@@ -153,8 +153,8 @@ bettercv-system/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/omkarlalla-code/bettercv.git
-   cd bettercv
+   git clone https://github.com/omkarlalla-code/ai-cv-system.git
+   cd ai-cv-system
    ```
 
 2. **Install dependencies**
@@ -445,8 +445,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact & Support
 
-- **Issues**: [GitHub Issues](https://github.com/omkarlalla-code/bettercv/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/omkarlalla-code/bettercv/discussions)
+- **Issues**: [GitHub Issues](https://github.com/omkarlalla-code/ai-cv-system/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/omkarlalla-code/ai-cv-system/discussions)
 - **Email**: lallanitin66@gmail.com
 
 ---
@@ -455,6 +455,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with ❤️ to make professional portfolios accessible to everyone**
 
-[⭐ Star this repo](https://github.com/omkarlalla-code/bettercv) if you find it useful!
+[⭐ Star this repo](https://github.com/omkarlalla-code/ai-cv-system) if you find it useful!
 
 </div>
