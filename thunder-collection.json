@@ -1,0 +1,643 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "BetterCV API",
+  "dateExported": "2024-10-09",
+  "version": "1.1",
+  "folders": [
+    {
+      "id": "auth-folder",
+      "name": "Authentication",
+      "containerId": "",
+      "created": "2024-10-09T00:00:00.000Z"
+    },
+    {
+      "id": "user-folder",
+      "name": "User Management",
+      "containerId": "",
+      "created": "2024-10-09T00:00:00.000Z"
+    },
+    {
+      "id": "builder-folder",
+      "name": "Builder V2",
+      "containerId": "",
+      "created": "2024-10-09T00:00:00.000Z"
+    },
+    {
+      "id": "template-folder",
+      "name": "Templates",
+      "containerId": "",
+      "created": "2024-10-09T00:00:00.000Z"
+    },
+    {
+      "id": "website-folder",
+      "name": "Websites",
+      "containerId": "",
+      "created": "2024-10-09T00:00:00.000Z"
+    }
+  ],
+  "requests": [
+    {
+      "id": "health-check",
+      "name": "Health Check",
+      "url": "http://localhost:3000/health",
+      "method": "GET",
+      "sortNum": 10000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [],
+      "params": [],
+      "tests": []
+    },
+    {
+      "id": "register",
+      "colId": "auth-folder",
+      "name": "Register User",
+      "url": "http://localhost:3000/api/auth/register",
+      "method": "POST",
+      "sortNum": 20000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"TestPass123!\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.token",
+          "action": "setto",
+          "value": "{{authToken}}"
+        }
+      ]
+    },
+    {
+      "id": "login",
+      "colId": "auth-folder",
+      "name": "Login",
+      "url": "http://localhost:3000/api/auth/login",
+      "method": "POST",
+      "sortNum": 30000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"TestPass123!\"\n}",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "id": "enable-2fa",
+      "colId": "auth-folder",
+      "name": "Enable 2FA",
+      "url": "http://localhost:3000/api/auth/enable-2fa",
+      "method": "POST",
+      "sortNum": 40000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "id": "get-profile",
+      "colId": "user-folder",
+      "name": "Get User Profile",
+      "url": "http://localhost:3000/api/user/profile",
+      "method": "GET",
+      "sortNum": 50000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        }
+      ],
+      "params": [],
+      "tests": []
+    },
+    {
+      "id": "update-profile",
+      "colId": "user-folder",
+      "name": "Update Profile",
+      "url": "http://localhost:3000/api/user/profile",
+      "method": "PUT",
+      "sortNum": 60000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"username\": \"newusername\"\n}",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "id": "get-user-stats",
+      "colId": "user-folder",
+      "name": "Get User Statistics",
+      "url": "http://localhost:3000/api/user/stats",
+      "method": "GET",
+      "sortNum": 70000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        }
+      ],
+      "params": [],
+      "tests": []
+    },
+    {
+      "id": "create-project",
+      "colId": "builder-folder",
+      "name": "Create Project",
+      "url": "http://localhost:3000/api/builder-v2/projects",
+      "method": "POST",
+      "sortNum": 80000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"My Portfolio Project\",\n  \"description\": \"A personal portfolio website\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.project.id",
+          "action": "setto",
+          "value": "{{projectId}}"
+        }
+      ]
+    },
+    {
+      "id": "get-projects",
+      "colId": "builder-folder",
+      "name": "Get All Projects",
+      "url": "http://localhost:3000/api/builder-v2/projects",
+      "method": "GET",
+      "sortNum": 90000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        }
+      ],
+      "params": [],
+      "tests": []
+    },
+    {
+      "id": "save-version",
+      "colId": "builder-folder",
+      "name": "Save Design Version",
+      "url": "http://localhost:3000/api/builder-v2/save-version",
+      "method": "POST",
+      "sortNum": 100000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "formdata",
+        "raw": "",
+        "form": [
+          {
+            "name": "projectId",
+            "value": "{{projectId}}"
+          },
+          {
+            "name": "polotnoState",
+            "value": "{\"pages\":[],\"version\":\"1.0\"}"
+          },
+          {
+            "name": "commitMessage",
+            "value": "Initial design"
+          },
+          {
+            "name": "screenshot",
+            "value": ""
+          }
+        ],
+        "files": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.versionId",
+          "action": "setto",
+          "value": "{{versionId}}"
+        }
+      ]
+    },
+    {
+      "id": "get-versions",
+      "colId": "builder-folder",
+      "name": "Get Version History",
+      "url": "http://localhost:3000/api/builder-v2/versions/{{projectId}}",
+      "method": "GET",
+      "sortNum": 110000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        }
+      ],
+      "params": [],
+      "tests": []
+    },
+    {
+      "id": "get-version",
+      "colId": "builder-folder",
+      "name": "Get Specific Version",
+      "url": "http://localhost:3000/api/builder-v2/version/{{versionId}}",
+      "method": "GET",
+      "sortNum": 120000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        }
+      ],
+      "params": [],
+      "tests": []
+    },
+    {
+      "id": "restore-version",
+      "colId": "builder-folder",
+      "name": "Restore Version",
+      "url": "http://localhost:3000/api/builder-v2/restore-version",
+      "method": "POST",
+      "sortNum": 130000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"versionId\": \"{{versionId}}\"\n}",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "id": "generate-website",
+      "colId": "builder-folder",
+      "name": "Generate Website (AI)",
+      "url": "http://localhost:3000/api/builder-v2/generate-website",
+      "method": "POST",
+      "sortNum": 140000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "formdata",
+        "raw": "",
+        "form": [
+          {
+            "name": "versionId",
+            "value": "{{versionId}}"
+          },
+          {
+            "name": "screenshot",
+            "value": ""
+          }
+        ],
+        "files": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.websiteId",
+          "action": "setto",
+          "value": "{{websiteId}}"
+        }
+      ]
+    },
+    {
+      "id": "iterate-website",
+      "colId": "builder-folder",
+      "name": "Iterate Website (AI)",
+      "url": "http://localhost:3000/api/builder-v2/iterate",
+      "method": "POST",
+      "sortNum": 150000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"websiteId\": \"{{websiteId}}\",\n  \"feedback\": \"Make the header background darker and increase the font size of the title\"\n}",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "id": "get-templates",
+      "colId": "template-folder",
+      "name": "Get All Templates",
+      "url": "http://localhost:3000/api/templates",
+      "method": "GET",
+      "sortNum": 160000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [],
+      "params": [
+        {
+          "name": "category",
+          "value": "tech",
+          "isPath": false,
+          "isDisabled": true
+        },
+        {
+          "name": "featured",
+          "value": "true",
+          "isPath": false,
+          "isDisabled": true
+        }
+      ],
+      "tests": []
+    },
+    {
+      "id": "get-template",
+      "colId": "template-folder",
+      "name": "Get Template by ID",
+      "url": "http://localhost:3000/api/templates/{{templateId}}",
+      "method": "GET",
+      "sortNum": 170000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [],
+      "params": [],
+      "tests": []
+    },
+    {
+      "id": "create-template",
+      "colId": "template-folder",
+      "name": "Create Custom Template",
+      "url": "http://localhost:3000/api/templates",
+      "method": "POST",
+      "sortNum": 180000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"My Custom Template\",\n  \"description\": \"A unique design template\",\n  \"htmlContent\": \"<!DOCTYPE html><html><body><h1>Hello</h1></body></html>\",\n  \"cssContent\": \"body { margin: 0; padding: 0; }\",\n  \"category\": \"creative\",\n  \"isPublic\": false\n}",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "id": "create-website",
+      "colId": "website-folder",
+      "name": "Create Website",
+      "url": "http://localhost:3000/api/website",
+      "method": "POST",
+      "sortNum": 190000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"siteTitle\": \"John Doe Portfolio\",\n  \"subdomain\": \"johndoe123\",\n  \"templateId\": \"{{templateId}}\",\n  \"themeColors\": {\n    \"primary\": \"#3b82f6\",\n    \"secondary\": \"#8b5cf6\",\n    \"background\": \"#ffffff\",\n    \"text\": \"#1f2937\"\n  }\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.website.id",
+          "action": "setto",
+          "value": "{{websiteIdMain}}"
+        }
+      ]
+    },
+    {
+      "id": "get-user-websites",
+      "colId": "website-folder",
+      "name": "Get User Websites",
+      "url": "http://localhost:3000/api/website/user",
+      "method": "GET",
+      "sortNum": 200000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        }
+      ],
+      "params": [],
+      "tests": []
+    },
+    {
+      "id": "get-website",
+      "colId": "website-folder",
+      "name": "Get Website by ID",
+      "url": "http://localhost:3000/api/website/{{websiteIdMain}}",
+      "method": "GET",
+      "sortNum": 210000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        }
+      ],
+      "params": [],
+      "tests": []
+    },
+    {
+      "id": "update-website",
+      "colId": "website-folder",
+      "name": "Update Website",
+      "url": "http://localhost:3000/api/website/{{websiteIdMain}}",
+      "method": "PUT",
+      "sortNum": 220000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"siteTitle\": \"Updated Portfolio Title\",\n  \"customCss\": \"body { background: #f0f0f0; }\"\n}",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "id": "publish-website",
+      "colId": "website-folder",
+      "name": "Publish Website",
+      "url": "http://localhost:3000/api/website/{{websiteIdMain}}/publish",
+      "method": "POST",
+      "sortNum": 230000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        }
+      ],
+      "params": [],
+      "tests": []
+    },
+    {
+      "id": "unpublish-website",
+      "colId": "website-folder",
+      "name": "Unpublish Website",
+      "url": "http://localhost:3000/api/website/{{websiteIdMain}}/unpublish",
+      "method": "POST",
+      "sortNum": 240000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        }
+      ],
+      "params": [],
+      "tests": []
+    },
+    {
+      "id": "delete-website",
+      "colId": "website-folder",
+      "name": "Delete Website",
+      "url": "http://localhost:3000/api/website/{{websiteIdMain}}",
+      "method": "DELETE",
+      "sortNum": 250000,
+      "created": "2024-10-09T00:00:00.000Z",
+      "modified": "2024-10-09T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{authToken}}"
+        }
+      ],
+      "params": [],
+      "tests": []
+    }
+  ],
+  "settings": {
+    "options": {
+      "baseUrl": "http://localhost:3000"
+    }
+  }
+}

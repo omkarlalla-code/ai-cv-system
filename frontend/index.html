@@ -1,0 +1,475 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVSite - Turn Your CV into a Professional Website</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>CVSite</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#templates">Templates</a>
+                <button class="btn btn-outline" onclick="showAuthModal('login')">Login</button>
+                <button class="btn btn-primary" onclick="showAuthModal('register')">Get Started</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Transform Your CV into a<br><span class="gradient-text">Professional Website</span></h1>
+                <p class="hero-subtitle">Upload your CV and get a stunning portfolio website in minutes. Perfect for students and professionals looking to stand out.</p>
+                <div class="hero-actions">
+                    <button class="btn btn-large btn-primary" onclick="showUploadModal()">Upload Your CV</button>
+                    <button class="btn btn-large btn-outline" onclick="scrollToSection('templates')">View Templates</button>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">2,500+</span>
+                        <span class="stat-label">Websites Created</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">15</span>
+                        <span class="stat-label">Professional Templates</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">5 min</span>
+                        <span class="stat-label">Average Setup Time</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="demo-browser">
+                    <div class="browser-header">
+                        <div class="browser-dots">
+                            <div class="dot red"></div>
+                            <div class="dot yellow"></div>
+                            <div class="dot green"></div>
+                        </div>
+                        <div class="browser-url">johndoe.cvsite.com</div>
+                    </div>
+                    <div class="browser-content">
+                        <div class="demo-website">
+                            <div class="demo-header">John Doe</div>
+                            <div class="demo-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose BetterCV?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI-Powered Parsing</h3>
+                    <p>Our advanced AI extracts and structures your CV data automatically from PDF, Word, or text files.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Professional Templates</h3>
+                    <p>Choose from beautifully designed templates optimized for different industries and career levels.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Instant Deployment</h3>
+                    <p>Get your personalized subdomain (yourname.bettercv.com) with automatic deployment via GitLab.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✏️</div>
+                    <h3>Live Editor</h3>
+                    <p>Customize your website with our intuitive editor. Change colors, fonts, and layout in real-time.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Secure & Private</h3>
+                    <p>Enterprise-grade security with 2FA, data encryption, and complete control over your content.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Mobile Optimized</h3>
+                    <p>All templates are responsive and look perfect on desktop, tablet, and mobile devices.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Upload Your CV</h3>
+                        <p>Simply drag and drop your CV in PDF, Word, or text format. Our AI will parse it instantly.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Choose a Template</h3>
+                        <p>Select from our collection of professional templates designed for your industry.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Customize & Preview</h3>
+                        <p>Use our live editor to customize colors, fonts, and layout. See changes in real-time.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Publish & Share</h3>
+                        <p>Get your personalized URL and share your professional website with the world.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Templates Preview -->
+    <section id="templates" class="templates">
+        <div class="container">
+            <h2 class="section-title">Choose Your Template</h2>
+            <div class="templates-grid">
+                <div class="template-card active">
+                    <div class="template-preview">
+                        <div class="template-mockup">
+                            <div class="mockup-header">Professional</div>
+                            <div class="mockup-content"></div>
+                        </div>
+                    </div>
+                    <div class="template-info">
+                        <h3>Professional</h3>
+                        <p>Clean and modern design perfect for corporate roles</p>
+                        <span class="template-tag">Most Popular</span>
+                    </div>
+                </div>
+                <div class="template-card">
+                    <div class="template-preview">
+                        <div class="template-mockup creative">
+                            <div class="mockup-header">Creative</div>
+                            <div class="mockup-content"></div>
+                        </div>
+                    </div>
+                    <div class="template-info">
+                        <h3>Creative</h3>
+                        <p>Bold and colorful design for creative professionals</p>
+                        <span class="template-tag">Designer Favorite</span>
+                    </div>
+                </div>
+                <div class="template-card">
+                    <div class="template-preview">
+                        <div class="template-mockup minimal">
+                            <div class="mockup-header">Minimal</div>
+                            <div class="mockup-content"></div>
+                        </div>
+                    </div>
+                    <div class="template-info">
+                        <h3>Minimal</h3>
+                        <p>Simple and elegant design focusing on content</p>
+                        <span class="template-tag">Developer Choice</span>
+                    </div>
+                </div>
+            </div>
+            <div class="templates-action">
+                <button class="btn btn-primary" onclick="showUploadModal()">Start Building Your Website</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Upload Your CV</h2>
+                <button class="modal-close" onclick="closeModal('uploadModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📄</div>
+                    <h3>Drag and drop your CV here</h3>
+                    <p>or <button class="upload-browse">browse files</button></p>
+                    <input type="file" id="cvFile" accept=".pdf,.doc,.docx,.txt" hidden>
+                    <div class="upload-formats">
+                        <span>Supported formats: PDF, Word, Text</span>
+                    </div>
+                </div>
+                <div class="upload-progress" id="uploadProgress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <p>Processing your CV...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="authModalTitle">Login</h2>
+                <button class="modal-close" onclick="closeModal('authModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Login Form -->
+                <form id="loginForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="loginEmail">Email Address</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="loginEmail" required autocomplete="email" placeholder="your@email.com">
+                            <span class="input-icon">📧</span>
+                        </div>
+                        <div class="field-error" id="loginEmailError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="loginPassword" required autocomplete="current-password" placeholder="Enter your password">
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('loginPassword')">👁️</button>
+                        </div>
+                        <div class="field-error" id="loginPasswordError"></div>
+                    </div>
+
+                    <!-- 2FA Code (initially hidden) -->
+                    <div class="form-group" id="twoFactorGroup" style="display: none;">
+                        <label for="twoFactorCode">Two-Factor Authentication Code</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="twoFactorCode" maxlength="6" placeholder="000000" pattern="[0-9]{6}" autocomplete="one-time-code">
+                            <span class="input-icon">🔐</span>
+                        </div>
+                        <small>Enter the 6-digit code from your authenticator app</small>
+                        <div class="field-error" id="twoFactorError"></div>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" id="rememberMe">
+                            <span class="checkmark"></span>
+                            Remember me
+                        </label>
+                        <a href="#" onclick="showForgotPassword()" class="forgot-link">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full" id="loginSubmitBtn">
+                        <span class="btn-text">Sign In</span>
+                        <span class="btn-loading" style="display: none;">
+                            <span class="spinner"></span>
+                            Signing in...
+                        </span>
+                    </button>
+
+                    <p class="auth-switch">Don't have an account? <a href="#" onclick="switchAuthMode('register')">Create account</a></p>
+                </form>
+
+                <!-- Register Form -->
+                <form id="registerForm" class="auth-form" style="display: none;">
+                    <div class="form-group">
+                        <label for="registerUsername">Username</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="registerUsername" required autocomplete="username" placeholder="yourusername" pattern="[a-zA-Z0-9_-]{3,20}" minlength="3" maxlength="20">
+                            <span class="input-icon">👤</span>
+                        </div>
+                        <small class="subdomain-preview">Your website: <span id="subdomainPreview">yourusername</span>.cvsite.com</small>
+                        <div class="field-error" id="registerUsernameError"></div>
+                        <div class="username-availability" id="usernameAvailability"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">Email Address</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="registerEmail" required autocomplete="email" placeholder="your@email.com">
+                            <span class="input-icon">📧</span>
+                        </div>
+                        <div class="field-error" id="registerEmailError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="registerPassword" required autocomplete="new-password" placeholder="Create a strong password" minlength="8">
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('registerPassword')">👁️</button>
+                        </div>
+                        <div class="password-strength" id="passwordStrength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <div class="strength-text" id="strengthText">Password strength</div>
+                        </div>
+                        <div class="field-error" id="registerPasswordError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="confirmPassword" required autocomplete="new-password" placeholder="Confirm your password">
+                            <span class="input-icon">🔒</span>
+                        </div>
+                        <div class="field-error" id="confirmPasswordError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" id="agreeTerms" required>
+                            <span class="checkmark"></span>
+                            I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>
+                        </label>
+                        <div class="field-error" id="agreeTermsError"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full" id="registerSubmitBtn">
+                        <span class="btn-text">Create Account</span>
+                        <span class="btn-loading" style="display: none;">
+                            <span class="spinner"></span>
+                            Creating account...
+                        </span>
+                    </button>
+
+                    <p class="auth-switch">Already have an account? <a href="#" onclick="switchAuthMode('login')">Sign in</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>CVSite</h3>
+                    <p>Transform your CV into a professional website</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Product</h4>
+                        <a href="#features">Features</a>
+                        <a href="#templates">Templates</a>
+                        <a href="#">Pricing</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Support</h4>
+                        <a href="#">Help Center</a>
+                        <a href="#">Contact</a>
+                        <a href="#">Status</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <a href="#">Privacy</a>
+                        <a href="#">Terms</a>
+                        <a href="#">Security</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 CVSite. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Reset Password</h2>
+                <button class="modal-close" onclick="closeModal('forgotPasswordModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="forgotPasswordForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="forgotEmail">Email Address</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="forgotEmail" required placeholder="Enter your email address">
+                            <span class="input-icon">📧</span>
+                        </div>
+                        <small>We'll send you a link to reset your password</small>
+                        <div class="field-error" id="forgotEmailError"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full" id="forgotSubmitBtn">
+                        <span class="btn-text">Send Reset Link</span>
+                        <span class="btn-loading" style="display: none;">
+                            <span class="spinner"></span>
+                            Sending...
+                        </span>
+                    </button>
+
+                    <p class="auth-switch">Remember your password? <a href="#" onclick="closeModal('forgotPasswordModal'); showAuthModal('login')">Back to login</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Verification Modal -->
+    <div id="verificationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Verify Your Email</h2>
+                <button class="modal-close" onclick="closeModal('verificationModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="verification-content">
+                    <div class="verification-icon">📧</div>
+                    <h3>Check your email!</h3>
+                    <p>We've sent a verification code to <strong id="verificationEmail"></strong></p>
+
+                    <form id="verificationForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="verificationCode">Verification Code</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="verificationCode" required maxlength="6" placeholder="000000" pattern="[0-9]{6}" autocomplete="one-time-code">
+                                <span class="input-icon">🔐</span>
+                            </div>
+                            <div class="field-error" id="verificationCodeError"></div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full" id="verifySubmitBtn">
+                            <span class="btn-text">Verify Email</span>
+                            <span class="btn-loading" style="display: none;">
+                                <span class="spinner"></span>
+                                Verifying...
+                            </span>
+                        </button>
+                    </form>
+
+                    <div class="resend-section">
+                        <p>Didn't receive the code?</p>
+                        <button class="btn btn-outline btn-small" id="resendBtn" onclick="resendVerificationCode()">
+                            <span class="btn-text">Resend Code</span>
+                            <span class="btn-loading" style="display: none;">
+                                <span class="spinner"></span>
+                                Sending...
+                            </span>
+                        </button>
+                        <div class="resend-timer" id="resendTimer" style="display: none;">
+                            Resend available in <span id="timerCount">60</span>s
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/main.js"></script>
+    <script src="scripts/auth.js"></script>
+</body>
+</html>

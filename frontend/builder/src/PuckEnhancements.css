@@ -1,0 +1,176 @@
+/* Puck Sidebar Enhancements - More compact, better organized */
+
+/* Make the properties panel more compact */
+.Puck-fields {
+  padding: 12px;
+}
+
+/* Group related fields with spacing */
+.Puck-field {
+  margin-bottom: 12px !important;
+}
+
+/* Add visual separation between field groups */
+.Puck-field:has(label:contains("Text")):not(:first-child) {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e8e8e8;
+}
+
+/* Style field labels to be more compact */
+.Puck-field label {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: #555 !important;
+  margin-bottom: 6px !important;
+  display: block;
+}
+
+/* Make inputs more compact */
+.Puck-field input[type="text"],
+.Puck-field input[type="number"],
+.Puck-field textarea,
+.Puck-field select {
+  padding: 8px 10px !important;
+  font-size: 13px !important;
+  border-radius: 6px !important;
+  border: 1px solid #ddd !important;
+}
+
+/* Number inputs with better styling */
+.Puck-field input[type="number"] {
+  width: 100%;
+}
+
+/* Textarea compact */
+.Puck-field textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+/* Select dropdowns */
+.Puck-field select {
+  width: 100%;
+  cursor: pointer;
+}
+
+/* Add hover effects */
+.Puck-field input:hover,
+.Puck-field textarea:hover,
+.Puck-field select:hover {
+  border-color: #667eea !important;
+}
+
+/* Focus states */
+.Puck-field input:focus,
+.Puck-field textarea:focus,
+.Puck-field select:focus {
+  outline: none !important;
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+}
+
+/* Component selector in sidebar */
+.Puck-sidebarSectionHeader {
+  padding: 12px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  background: #f8f9fa !important;
+  border-bottom: 1px solid #e8e8e8 !important;
+}
+
+/* Component buttons in sidebar */
+.Puck-sidebarSection button {
+  padding: 10px 12px !important;
+  font-size: 13px !important;
+  margin-bottom: 6px !important;
+  border-radius: 6px !important;
+  transition: all 0.2s !important;
+}
+
+.Puck-sidebarSection button:hover {
+  background: #f0f2ff !important;
+  border-color: #667eea !important;
+  transform: translateX(2px);
+}
+
+/* Selected component highlight */
+.Puck-sidebarSection button[data-selected="true"] {
+  background: #667eea !important;
+  color: white !important;
+  border-color: #667eea !important;
+}
+
+/* Preview area */
+.Puck-preview {
+  background: #f5f5f5 !important;
+}
+
+/* Make the canvas stand out */
+.Puck-preview > * {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+/* Compact the component list */
+.Puck-sidebarSection {
+  padding: 12px !important;
+}
+
+/* Add emoji spacing in labels */
+label:has(:first-child:is(span)) {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Scrollbar styling for sidebar */
+.Puck-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.Puck-sidebar::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+.Puck-sidebar::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.Puck-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Hide empty state text to reduce clutter */
+.Puck-empty {
+  display: none;
+}
+
+/* Make the component be clearly focused when selected */
+[data-puck-component-selected="true"] {
+  outline: 2px solid #667eea !important;
+  outline-offset: 4px;
+}
+
+/* Compact field groups with visual hierarchy */
+.Puck-field-group {
+  background: #fafafa;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+/* Add subtle animations */
+.Puck-field {
+  transition: all 0.2s ease;
+}
+
+.Puck-field:hover {
+  background: rgba(102, 126, 234, 0.02);
+  border-radius: 6px;
+  padding-left: 4px;
+  padding-right: 4px;
+  margin-left: -4px;
+  margin-right: -4px;
+}

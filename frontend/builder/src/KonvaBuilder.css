@@ -1,0 +1,198 @@
+.konva-builder {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f5f5;
+  overflow: hidden;
+}
+
+.builder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background: #667eea;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.builder-header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: white;
+  color: #667eea;
+}
+
+.btn-primary:hover {
+  background: #f0f0f0;
+}
+
+.builder-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 250px;
+  background: white;
+  padding: 20px;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+  overflow-y: auto;
+}
+
+.sidebar h3 {
+  margin: 0 0 15px 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.sidebar-btn {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #e0e0e0;
+  background: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.sidebar-btn:hover {
+  background: #f5f5f5;
+  border-color: #667eea;
+}
+
+.sidebar-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.sidebar-section p {
+  margin: 0 0 10px 0;
+  font-weight: 600;
+  font-size: 14px;
+  color: #666;
+}
+
+.sidebar-btn-small {
+  width: 48%;
+  padding: 10px;
+  margin-bottom: 10px;
+  margin-right: 4%;
+  border: 1px solid #e0e0e0;
+  background: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.sidebar-btn-small:nth-child(even) {
+  margin-right: 0;
+}
+
+.sidebar-btn-small:hover {
+  background: #f5f5f5;
+  border-color: #667eea;
+}
+
+.properties-panel {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #e0e0e0;
+}
+
+.properties-panel h4 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.properties-panel label {
+  display: block;
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #666;
+}
+
+.properties-panel input,
+.properties-panel select {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.btn-delete {
+  width: 100%;
+  padding: 10px;
+  margin-top: 15px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.btn-delete:hover {
+  background: #cc0000;
+}
+
+.canvas-container {
+  flex: 1;
+  overflow: auto;
+  padding: 40px;
+  background: #e8e8e8;
+}
+
+.canvas {
+  margin: 0 auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.element-selected {
+  outline: 2px solid #667eea !important;
+  outline-offset: -2px;
+}
+
+/* Rnd custom styles */
+.react-draggable {
+  cursor: move;
+}
+
+.react-resizable-handle {
+  background: #667eea;
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50%;
+}

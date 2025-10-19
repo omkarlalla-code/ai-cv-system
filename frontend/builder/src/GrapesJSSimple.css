@@ -1,0 +1,92 @@
+/* Simplified GrapesJS styling */
+
+/* Hide default GrapesJS panels */
+.gjs-pn-panels {
+  display: none !important;
+}
+
+/* Clean up block styling */
+.gjs-block {
+  width: 100% !important;
+  min-height: auto !important;
+  padding: 15px !important;
+  margin-bottom: 12px !important;
+  background: white !important;
+  border: 2px solid #e0e0e0 !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.gjs-block:hover {
+  border-color: #667eea !important;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2) !important;
+  transform: translateY(-2px) !important;
+}
+
+.gjs-block__media {
+  display: none !important;
+}
+
+.gjs-block-label {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #333 !important;
+  text-align: left !important;
+  line-height: 1.4 !important;
+}
+
+/* Block categories */
+.gjs-block-category {
+  margin-bottom: 20px !important;
+}
+
+.gjs-block-category .gjs-title {
+  background: transparent !important;
+  border: none !important;
+  padding: 10px 0 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  color: #667eea !important;
+  letter-spacing: 0.5px !important;
+}
+
+.gjs-blocks-c {
+  padding: 0 !important;
+}
+
+/* Canvas improvements */
+.gjs-cv-canvas {
+  background: #ffffff !important;
+  top: 0 !important;
+}
+
+.gjs-frame {
+  border: none !important;
+}
+
+/* Component toolbar */
+.gjs-toolbar {
+  background: #667eea !important;
+  border-radius: 4px !important;
+}
+
+.gjs-toolbar-item {
+  color: white !important;
+}
+
+/* Selected component highlight */
+[data-gjs-type] {
+  outline: 2px dashed transparent !important;
+  outline-offset: 2px !important;
+  transition: outline 0.2s ease !important;
+}
+
+[data-gjs-type]:hover {
+  outline-color: rgba(102, 126, 234, 0.5) !important;
+}
+
+[data-gjs-type].gjs-selected {
+  outline-color: #667eea !important;
+}

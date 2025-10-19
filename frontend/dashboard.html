@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CVSite</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>CVSite</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html">Home</a>
+                <a href="#" class="active">Dashboard</a>
+                <div class="user-menu">
+                    <button class="user-button" onclick="toggleUserMenu()">
+                        <span id="userName">Loading...</span>
+                        <span class="chevron">▼</span>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="#" onclick="showSettingsModal()">Settings</a>
+                        <a href="#" onclick="logout()">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard">
+        <div class="container">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="header-content">
+                    <h1>Dashboard</h1>
+                    <p>Manage your CV websites and templates</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="showUploadModal()">
+                        <span>📄</span> Upload New CV
+                    </button>
+                    <button class="btn btn-primary" onclick="createNewSite()">
+                        <span>+</span> Create Website
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🌐</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="websiteCount">0</div>
+                        <div class="stat-label">Active Websites</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👀</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="totalViews">0</div>
+                        <div class="stat-label">Total Views</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📄</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="cvCount">0</div>
+                        <div class="stat-label">CVs Uploaded</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="templateCount">0</div>
+                        <div class="stat-label">Templates Used</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="dashboard-content">
+                <!-- CV Data Section -->
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2>Your CV Data</h2>
+                        <button class="btn btn-outline btn-small" onclick="refreshCVData()">
+                            <span>🔄</span> Refresh
+                        </button>
+                    </div>
+                    <div class="cv-data-grid" id="cvDataGrid">
+                        <!-- CV data cards will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Websites Section -->
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2>Your Websites</h2>
+                        <button class="btn btn-outline btn-small" onclick="refreshWebsites()">
+                            <span>🔄</span> Refresh
+                        </button>
+                    </div>
+                    <div class="websites-grid" id="websitesGrid">
+                        <!-- Website cards will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Recent Activity -->
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2>Recent Activity</h2>
+                    </div>
+                    <div class="activity-list" id="activityList">
+                        <!-- Activity items will be loaded here -->
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Upload New CV</h2>
+                <button class="modal-close" onclick="closeModal('uploadModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📄</div>
+                    <h3>Drag and drop your CV here</h3>
+                    <p>or <button class="upload-browse">browse files</button></p>
+                    <input type="file" id="cvFile" accept=".pdf,.doc,.docx,.txt" hidden>
+                    <div class="upload-formats">
+                        <span>Supported formats: PDF, Word, Text</span>
+                    </div>
+                </div>
+                <div class="upload-progress" id="uploadProgress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <p>Processing your CV...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Website Editor Modal -->
+    <div id="editorModal" class="modal modal-large">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="editorModalTitle">Create Website</h2>
+                <button class="modal-close" onclick="closeModal('editorModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="editor-container">
+                    <div class="editor-sidebar">
+                        <div class="editor-section">
+                            <h3>Template</h3>
+                            <div class="template-selector" id="templateSelector">
+                                <!-- Template options will be loaded here -->
+                            </div>
+                        </div>
+                        <div class="editor-section">
+                            <h3>CV Data</h3>
+                            <select id="cvDataSelector" class="form-select">
+                                <option value="">Select CV data...</option>
+                            </select>
+                        </div>
+                        <div class="editor-section">
+                            <h3>Customization</h3>
+                            <div class="form-group">
+                                <label for="siteTitle">Website Title</label>
+                                <input type="text" id="siteTitle" placeholder="My Portfolio">
+                            </div>
+                            <div class="form-group">
+                                <label for="subdomain">Subdomain</label>
+                                <div class="subdomain-input">
+                                    <input type="text" id="subdomain" placeholder="yourname">
+                                    <span>.cvsite.com</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="primaryColor">Primary Color</label>
+                                <input type="color" id="primaryColor" value="#2563eb">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="editor-preview">
+                        <div class="preview-header">
+                            <span>Preview</span>
+                            <div class="preview-controls">
+                                <button class="btn btn-small" onclick="previewWebsite()">
+                                    <span>👁️</span> Preview
+                                </button>
+                                <button class="btn btn-primary btn-small" onclick="publishWebsite()">
+                                    <span>🚀</span> Publish
+                                </button>
+                            </div>
+                        </div>
+                        <div class="preview-frame">
+                            <iframe id="previewIframe" src="about:blank"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Account Settings</h2>
+                <button class="modal-close" onclick="closeModal('settingsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-tabs">
+                    <button class="tab-button active" onclick="showSettingsTab('profile')">Profile</button>
+                    <button class="tab-button" onclick="showSettingsTab('security')">Security</button>
+                    <button class="tab-button" onclick="showSettingsTab('billing')">Billing</button>
+                </div>
+
+                <div class="settings-content">
+                    <!-- Profile Tab -->
+                    <div id="profileTab" class="settings-tab active">
+                        <form id="profileForm">
+                            <div class="form-group">
+                                <label for="profileUsername">Username</label>
+                                <input type="text" id="profileUsername" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="profileEmail">Email</label>
+                                <input type="email" id="profileEmail">
+                            </div>
+                            <div class="form-group">
+                                <label for="profilePicture">Profile Picture</label>
+                                <input type="file" id="profilePicture" accept="image/*">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                        </form>
+                    </div>
+
+                    <!-- Security Tab -->
+                    <div id="securityTab" class="settings-tab">
+                        <div class="security-section">
+                            <h3>Change Password</h3>
+                            <form id="passwordForm">
+                                <div class="form-group">
+                                    <label for="currentPassword">Current Password</label>
+                                    <input type="password" id="currentPassword" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newPassword">New Password</label>
+                                    <input type="password" id="newPassword" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmNewPassword">Confirm New Password</label>
+                                    <input type="password" id="confirmNewPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Change Password</button>
+                            </form>
+                        </div>
+
+                        <div class="security-section">
+                            <h3>Two-Factor Authentication</h3>
+                            <div class="two-fa-status" id="twoFAStatus">
+                                <p>Two-factor authentication is currently <strong id="twoFAStatusText">disabled</strong></p>
+                                <button class="btn btn-outline" id="twoFAToggle" onclick="toggleTwoFA()">Enable 2FA</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Billing Tab -->
+                    <div id="billingTab" class="settings-tab">
+                        <div class="billing-info">
+                            <h3>Current Plan</h3>
+                            <div class="plan-card">
+                                <h4>Free Plan</h4>
+                                <p>3 active websites, Basic templates, 1GB storage</p>
+                                <button class="btn btn-primary">Upgrade Plan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/main.js"></script>
+    <script src="scripts/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CVSite Button Test</title>
+</head>
+<body>
+    <h1>Button Test</h1>
+    <button onclick="showAuthModal('login')">Test Login Button</button>
+    <button onclick="console.log('Basic onclick works')">Test Basic Button</button>
+
+    <div id="authModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div style="background:white; margin:50px auto; padding:20px; width:400px;">
+            <h2>Test Modal</h2>
+            <button onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        console.log('Script loaded');
+
+        function showAuthModal(mode) {
+            console.log('showAuthModal called with mode:', mode);
+            const modal = document.getElementById('authModal');
+            if (modal) {
+                modal.style.display = 'block';
+                console.log('Modal shown');
+            } else {
+                console.log('Modal not found');
+            }
+        }
+
+        function closeModal() {
+            console.log('closeModal called');
+            const modal = document.getElementById('authModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Check if scripts are loading
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            console.log('showAuthModal function exists:', typeof showAuthModal);
+        });
+    </script>
+</body>
+</html>
