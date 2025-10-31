@@ -39,9 +39,9 @@ Perfect for schools, universities, and organizations wanting to create standardi
 - Automatic section detection (education, experience, skills, projects)
 - Contact information extraction
 
-### 🎨 Visual Website Builder (Puck)
+### 🎨 Visual Website Builder (GrapesJS)
 - **Drag-and-drop** interface - No coding required
-- **25+ Components** - Headers, cards, grids, timelines, testimonials
+- **Visual editor** - Edit directly on canvas
 - **Real-time preview** - See changes instantly
 - **Template system** - Start with pre-built designs
 - **Version control** - Save and restore design versions
@@ -80,10 +80,10 @@ Perfect for schools, universities, and organizations wanting to create standardi
 - **AI**: Anthropic Claude 3.5 Sonnet API
 
 ### Frontend
-- **Builder**: React + Puck (drag-and-drop)
+- **Builder**: React + GrapesJS (drag-and-drop visual editor)
+- **Build Tool**: Vite
 - **Styling**: CSS3, Flexbox, Grid
 - **UI**: Vanilla JS (dashboard), React (builder)
-- **Image Handling**: Sharp
 
 ### Infrastructure
 - **Version Control**: Git + GitLab
@@ -111,10 +111,11 @@ bettercv-system/
 │   └── package.json
 │
 ├── frontend/                  # Client applications
-│   ├── builder/              # React builder app (Puck)
+│   ├── builder/              # React builder app (GrapesJS)
 │   │   ├── src/
-│   │   │   ├── components/   # Puck components
+│   │   │   ├── components/   # Builder components
 │   │   │   ├── App.jsx       # Main builder app
+│   │   │   ├── GrapesJSEditor.jsx  # GrapesJS editor
 │   │   │   └── App.css
 │   │   └── package.json
 │   ├── index.html            # Landing page
@@ -230,40 +231,17 @@ bettercv-system/
 ### API Collection
 - **[Thunder Client Collection](thunder-collection.json)** - Import into VS Code/Postman
 
-## 🎨 Builder Components
+## 🎨 Builder Features
 
-### Layout Components (8)
-- `Section` - Page sections with customizable backgrounds
-- `Grid` - Responsive grid layouts
-- `FlexContainer` - Flexible container with alignment
-- `TwoColumn` - Two-column layout
-- `Card` - Content cards with shadows/borders
-- `HeroSection` - Large header sections
-- `Navbar` - Navigation bars
-- `Footer` - Page footers
-
-### CV Components (6)
-- `EducationCard` - Education entries
-- `ExperienceCard` - Work experience
-- `ProjectCard` - Project showcases
-- `SkillBadge` - Individual skills
-- `SkillsGrid` - Skill collections
-- `ContactInfo` - Contact details
-
-### Portfolio Components (4)
-- `Timeline` - Timeline visualizations
-- `Testimonial` - Testimonial cards
-- `StatsSection` - Statistics display
-- `CTASection` - Call-to-action sections
-
-### Basic Components (7)
-- `Heading` - H1-H6 headings
-- `Paragraph` - Text blocks
-- `Button` - Interactive buttons
-- `Image` - Image display
-- `Box` - Generic container
-- `Spacer` - Vertical spacing
-- `Divider` - Horizontal lines
+### GrapesJS Visual Editor
+- **Component Library** - Drag and drop HTML elements
+- **Style Manager** - Visual CSS editor
+- **Layer Manager** - Organize page structure
+- **Block Manager** - Pre-built components
+- **Device Manager** - Preview different screen sizes
+- **Asset Manager** - Image and file uploads
+- **Code Editor** - Direct HTML/CSS editing
+- **Undo/Redo** - Full history management
 
 ## 🔌 API Endpoints
 
@@ -404,10 +382,10 @@ curl -X POST http://localhost:3000/api/auth/register \
 
 ### Current Version (v1.0)
 - ✅ CV upload and AI parsing
-- ✅ Drag-and-drop builder with Puck
-- ✅ AI HTML generation
-- ✅ Authentication system
-- ✅ Version control
+- ✅ Visual drag-and-drop builder with GrapesJS
+- ✅ AI HTML generation with Claude 3.5 Sonnet
+- ✅ Authentication system (JWT, 2FA)
+- ✅ Version control for designs
 - ✅ Template system
 
 ### Planned Features
@@ -438,10 +416,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - **Anthropic Claude API** - AI-powered CV parsing and HTML generation
-- **Puck** - Drag-and-drop builder framework
+- **GrapesJS** - Open-source visual page builder
 - **Express.js** - Backend framework
 - **PostgreSQL** - Database
 - **React** - Frontend library
+- **Vite** - Build tool
 
 ## 📧 Contact & Support
 

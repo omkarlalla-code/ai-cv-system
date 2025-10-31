@@ -72,7 +72,7 @@ router.get('/projects', async (req, res) => {
  */
 router.post('/save-version', upload.single('screenshot'), async (req, res) => {
   try {
-    const { projectId, polotnoState, commitMessage } = req.body;
+    const { projectId, builderState, commitMessage } = req.body;
     const userId = req.user?.id;
 
     // TODO: Upload screenshot to cloud storage (S3/CloudFlare)
@@ -85,7 +85,7 @@ router.post('/save-version', upload.single('screenshot'), async (req, res) => {
     // Use the helper function to create version
     const result = await pool.query(
       'SELECT create_version($1, $2, $3, $4, $5) as version_id',
-      [projectId, JSON.parse(polotnoState), screenshotUrl, commitMessage, userId]
+      [projectId, JSON.parse(builderState), screenshotUrl, commitMessage, userId]
     );
 
     const versionId = result.rows[0].version_id;
@@ -141,7 +141,7 @@ router.get('/version/:versionId', async (req, res) => {
     const { versionId } = req.params;
 
     const result = await pool.query(
-      `SELECT id, project_id, version_number, polotno_state,
+      `SELECT id, project_id, version_number, builder_state,
               screenshot_url, commit_message, created_at
        FROM design_versions
        WHERE id = $1`,
@@ -169,7 +169,7 @@ router.post('/restore-version', async (req, res) => {
 
     // Get the version
     const versionResult = await pool.query(
-      'SELECT project_id, polotno_state FROM design_versions WHERE id = $1',
+      'SELECT project_id, builder_state FROM design_versions WHERE id = $1',
       [versionId]
     );
 
@@ -177,7 +177,7 @@ router.post('/restore-version', async (req, res) => {
       return res.status(404).json({ error: 'Version not found' });
     }
 
-    const { project_id, polotno_state } = versionResult.rows[0];
+    const { project_id, builder_state } = versionResult.rows[0];
 
     // Mark all versions as not current
     await pool.query(
@@ -194,7 +194,7 @@ router.post('/restore-version', async (req, res) => {
     res.json({
       success: true,
       message: 'Version restored successfully',
-      polotnoState: polotno_state,
+      builderState: builder_state,
     });
   } catch (error) {
     console.error('Error restoring version:', error);
@@ -208,7 +208,7 @@ router.post('/restore-version', async (req, res) => {
  */
 router.post('/generate-website', upload.single('screenshot'), async (req, res) => {
   try {
-    const { versionId, polotnoState } = req.body;
+    const { versionId, builderState } = req.body;
     const startTime = Date.now();
 
     if (!req.file) {

@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS design_versions (
     version_number INTEGER NOT NULL,
     parent_version_id UUID REFERENCES design_versions(id),
 
-    -- Polotno state (full canvas JSON)
-    polotno_state JSONB NOT NULL,
+    -- Builder state (full canvas JSON - GrapesJS format)
+    builder_state JSONB NOT NULL,
 
     -- Screenshots and previews
     screenshot_url TEXT,
@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS saved_components (
     tags TEXT[],  -- searchable tags
 
     -- Design data
-    polotno_state JSONB NOT NULL,
+    builder_state JSONB NOT NULL,
     thumbnail_url TEXT,
 
     -- Sharing
@@ -227,12 +227,12 @@ CREATE OR REPLACE FUNCTION get_latest_version(p_project_id UUID)
 RETURNS TABLE (
     version_id UUID,
     version_number INTEGER,
-    polotno_state JSONB,
+    builder_state JSONB,
     screenshot_url TEXT
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT id, version_number, polotno_state, screenshot_url
+    SELECT id, version_number, builder_state, screenshot_url
     FROM design_versions
     WHERE project_id = p_project_id AND is_current = true
     LIMIT 1;
@@ -242,7 +242,7 @@ $$ LANGUAGE plpgsql;
 -- Function to create new version
 CREATE OR REPLACE FUNCTION create_version(
     p_project_id UUID,
-    p_polotno_state JSONB,
+    p_builder_state JSONB,
     p_screenshot_url TEXT,
     p_commit_message TEXT,
     p_user_id UUID
@@ -267,7 +267,7 @@ BEGIN
     INSERT INTO design_versions (
         project_id,
         version_number,
-        polotno_state,
+        builder_state,
         screenshot_url,
         commit_message,
         is_current,
@@ -275,7 +275,7 @@ BEGIN
     ) VALUES (
         p_project_id,
         v_version_number,
-        p_polotno_state,
+        p_builder_state,
         p_screenshot_url,
         p_commit_message,
         true,

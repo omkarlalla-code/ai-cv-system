@@ -5,6 +5,27 @@ const path = require('path');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
+// Validate required environment variables
+const requiredEnvVars = [
+  'ANTHROPIC_API_KEY',
+  'JWT_SECRET',
+  'DB_NAME',
+  'DB_USER',
+  'DB_PASSWORD'
+];
+
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ ERROR: Missing required environment variables:');
+  missingEnvVars.forEach(varName => {
+    console.error(`   - ${varName}`);
+  });
+  console.error('\n💡 Create a .env file in the backend directory with these variables.');
+  console.error('   See .env.example for reference.\n');
+  process.exit(1);
+}
+
 // Import route modules
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');

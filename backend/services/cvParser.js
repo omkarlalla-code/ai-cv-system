@@ -25,7 +25,7 @@ class CVParser {
           break;
         case 'docx':
         case 'doc':
-          rawText = await parseWord(filePath);
+          rawText = await this.parseWord(filePath);
           break;
         case 'txt':
           rawText = await this.parseText(filePath);

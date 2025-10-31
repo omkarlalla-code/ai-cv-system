@@ -31,7 +31,7 @@ function App() {
 
       const formData = new FormData();
       formData.append('screenshot', blob, 'design.png');
-      formData.append('polotnoState', JSON.stringify({
+      formData.append('builderState', JSON.stringify({
         html: editor.getHtml(),
         css: editor.getCss(),
       }));
