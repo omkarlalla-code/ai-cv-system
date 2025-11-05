@@ -1,0 +1,125 @@
+/* Card Component */
+.card {
+  background: var(--white);
+  border: var(--border);
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Variants */
+.card-default {
+  background: var(--white);
+  border: var(--border);
+}
+
+.card-outlined {
+  background: transparent;
+  border: var(--border);
+}
+
+.card-flat {
+  background: var(--off-white);
+  border: none;
+}
+
+/* Padding */
+.card-padding-none .card-body {
+  padding: 0;
+}
+
+.card-padding-small .card-body {
+  padding: 15px;
+}
+
+.card-padding-normal .card-body {
+  padding: 25px;
+}
+
+.card-padding-large .card-body {
+  padding: 40px;
+}
+
+/* Modifiers */
+.card-hoverable:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.card-clickable {
+  cursor: pointer;
+}
+
+.card-clickable:active {
+  transform: translateY(0);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Card Header */
+.card-header {
+  padding: 20px 25px;
+  border-bottom: var(--border);
+  background: var(--off-white);
+}
+
+.card-padding-small .card-header {
+  padding: 15px;
+}
+
+.card-padding-large .card-header {
+  padding: 30px 40px;
+}
+
+.card-padding-none .card-header {
+  padding: 20px 25px;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.card-subtitle {
+  margin: 8px 0 0 0;
+  font-size: 13px;
+  color: var(--gray);
+  font-weight: 300;
+}
+
+/* Card Body */
+.card-body {
+  flex: 1;
+}
+
+/* Card Footer */
+.card-footer {
+  padding: 20px 25px;
+  border-top: var(--border);
+  background: var(--off-white);
+}
+
+.card-padding-small .card-footer {
+  padding: 15px;
+}
+
+.card-padding-large .card-footer {
+  padding: 30px 40px;
+}
+
+.card-padding-none .card-footer {
+  padding: 20px 25px;
+}
+
+/* Variant-specific adjustments */
+.card-flat .card-header,
+.card-flat .card-footer {
+  background: transparent;
+  border-color: var(--light-gray);
+}
+
+.card-outlined .card-header,
+.card-outlined .card-footer {
+  background: transparent;
+}

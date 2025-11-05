@@ -433,6 +433,281 @@ router.get('/user/my-templates', authMiddleware, async (req, res, next) => {
     }
 });
 
+// Publish template from a website
+router.post('/publish', authMiddleware, async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const {
+            websiteId,
+            name,
+            description,
+            category = 'custom',
+            previewImageUrl
+        } = req.body;
+
+        if (!websiteId || !name) {
+            return res.status(400).json({
+                success: false,
+                message: 'Website ID and template name are required'
+            });
+        }
+
+        // Verify website belongs to user
+        const websiteResult = await query(
+            'SELECT * FROM user_sites WHERE id = $1 AND user_id = $2',
+            [websiteId, userId]
+        );
+
+        if (websiteResult.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Website not found'
+            });
+        }
+
+        const website = websiteResult.rows[0];
+
+        // Get the website's template content to clone
+        const templateResult = await query(
+            'SELECT html_content, css_content FROM templates WHERE id = $1',
+            [website.template_id]
+        );
+
+        if (templateResult.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Website template not found'
+            });
+        }
+
+        const templateContent = templateResult.rows[0];
+
+        // Create new public template
+        const result = await query(`
+            INSERT INTO templates (
+                name,
+                description,
+                html_content,
+                css_content,
+                category,
+                preview_image_url,
+                is_public,
+                created_by
+            ) VALUES ($1, $2, $3, $4, $5, $6, true, $7)
+            RETURNING *
+        `, [
+            name,
+            description || '',
+            templateContent.html_content,
+            templateContent.css_content,
+            category,
+            previewImageUrl || null,
+            userId
+        ]);
+
+        // Log activity
+        await query(`
+            INSERT INTO activity_logs (user_id, action, details, ip_address, user_agent)
+            VALUES ($1, 'publish_template', $2, $3, $4)
+        `, [
+            userId,
+            JSON.stringify({
+                templateId: result.rows[0].id,
+                websiteId,
+                name,
+                category
+            }),
+            req.ip,
+            req.get('User-Agent')
+        ]);
+
+        res.status(201).json({
+            success: true,
+            message: 'Template published successfully',
+            data: result.rows[0]
+        });
+
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Unpublish template (make it private)
+router.post('/:id/unpublish', authMiddleware, async (req, res, next) => {
+    try {
+        const templateId = req.params.id;
+        const userId = req.user.id;
+
+        // Check if template exists and user is the creator
+        const templateCheck = await query(
+            'SELECT created_by FROM templates WHERE id = $1',
+            [templateId]
+        );
+
+        if (templateCheck.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Template not found'
+            });
+        }
+
+        if (templateCheck.rows[0].created_by !== userId) {
+            return res.status(403).json({
+                success: false,
+                message: 'You can only unpublish templates you created'
+            });
+        }
+
+        // Update template to private
+        const result = await query(`
+            UPDATE templates
+            SET is_public = false, updated_at = NOW()
+            WHERE id = $1
+            RETURNING id, name, is_public
+        `, [templateId]);
+
+        // Log activity
+        await query(`
+            INSERT INTO activity_logs (user_id, action, details, ip_address, user_agent)
+            VALUES ($1, 'unpublish_template', $2, $3, $4)
+        `, [
+            userId,
+            JSON.stringify({
+                templateId
+            }),
+            req.ip,
+            req.get('User-Agent')
+        ]);
+
+        res.json({
+            success: true,
+            message: 'Template unpublished successfully',
+            data: result.rows[0]
+        });
+
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Use template to create a new website
+router.post('/:id/use', authMiddleware, async (req, res, next) => {
+    try {
+        const templateId = req.params.id;
+        const userId = req.user.id;
+        const {
+            siteTitle,
+            cvDataId
+        } = req.body;
+
+        if (!siteTitle || !cvDataId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Site title and CV data ID are required'
+            });
+        }
+
+        // Verify template exists and is public (or user is creator)
+        const templateResult = await query(`
+            SELECT * FROM templates
+            WHERE id = $1 AND (is_public = true OR created_by = $2)
+        `, [templateId, userId]);
+
+        if (templateResult.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Template not found or not accessible'
+            });
+        }
+
+        // Verify CV data belongs to user
+        const cvResult = await query(
+            'SELECT id FROM cv_data WHERE id = $1 AND user_id = $2',
+            [cvDataId, userId]
+        );
+
+        if (cvResult.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'CV data not found'
+            });
+        }
+
+        // Generate unique subdomain from site title
+        const baseSubdomain = siteTitle
+            .toLowerCase()
+            .replace(/[^a-z0-9-]/g, '-')
+            .replace(/-+/g, '-')
+            .substring(0, 50);
+
+        let subdomain = baseSubdomain;
+        let counter = 1;
+
+        while (true) {
+            const check = await query(
+                'SELECT id FROM user_sites WHERE subdomain = $1',
+                [subdomain]
+            );
+
+            if (check.rows.length === 0) break;
+
+            subdomain = `${baseSubdomain}-${counter}`;
+            counter++;
+        }
+
+        // Create new website from template
+        const websiteResult = await query(`
+            INSERT INTO user_sites (
+                user_id,
+                template_id,
+                cv_data_id,
+                site_title,
+                subdomain,
+                theme_colors,
+                is_published
+            ) VALUES ($1, $2, $3, $4, $5, $6, false)
+            RETURNING *
+        `, [
+            userId,
+            templateId,
+            cvDataId,
+            siteTitle,
+            subdomain,
+            JSON.stringify({ primary: '#2563eb' }) // Default color
+        ]);
+
+        // Increment template usage count
+        await query(
+            'UPDATE templates SET usage_count = usage_count + 1 WHERE id = $1',
+            [templateId]
+        );
+
+        // Log activity
+        await query(`
+            INSERT INTO activity_logs (user_id, action, details, ip_address, user_agent)
+            VALUES ($1, 'use_template', $2, $3, $4)
+        `, [
+            userId,
+            JSON.stringify({
+                templateId,
+                websiteId: websiteResult.rows[0].id,
+                subdomain
+            }),
+            req.ip,
+            req.get('User-Agent')
+        ]);
+
+        res.status(201).json({
+            success: true,
+            message: 'Website created from template successfully',
+            data: websiteResult.rows[0]
+        });
+
+    } catch (error) {
+        next(error);
+    }
+});
+
 // Delete custom template (only creator can delete)
 router.delete('/:id', authMiddleware, async (req, res, next) => {
     try {

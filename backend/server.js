@@ -47,6 +47,9 @@ const templateRoutes = require('./routes/template');
 const builderRoutes = require('./routes/builder');
 const builderV2Routes = require('./routes/builder-v2');
 const adminRoutes = require('./routes/admin');
+const versionsRoutes = require('./routes/versions');
+const aiRoutes = require('./routes/ai');
+const statsRoutes = require('./routes/stats');
 
 // Import middleware
 const authMiddleware = require('./middleware/auth');
@@ -179,6 +182,9 @@ app.use('/api/auth', authLimiter, verifyCsrfToken, authRoutes);
 app.use('/api/user', authMiddleware, verifyCsrfToken, userRoutes);
 app.use('/api', verifyCsrfToken, uploadRoutes);
 app.use('/api', verifyCsrfToken, websiteRoutes);
+app.use('/api', verifyCsrfToken, versionsRoutes);
+app.use('/api', verifyCsrfToken, aiRoutes);
+app.use('/api', verifyCsrfToken, statsRoutes);
 app.use('/api/templates', verifyCsrfToken, templateRoutes);
 app.use('/api/builder', verifyCsrfToken, builderRoutes);
 app.use('/api/builder-v2', verifyCsrfToken, builderV2Routes);

@@ -380,6 +380,348 @@ router.patch('/websites/:id/toggle-publish', authMiddleware, async (req, res, ne
     }
 });
 
+// Publish website
+router.post('/websites/:id/publish', authMiddleware, async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const websiteId = req.params.id;
+
+        const result = await query(`
+            UPDATE user_sites SET
+                is_published = true,
+                last_deployed_at = NOW(),
+                updated_at = NOW()
+            WHERE id = $1 AND user_id = $2
+            RETURNING id, subdomain, is_published
+        `, [websiteId, userId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Website not found'
+            });
+        }
+
+        const website = result.rows[0];
+
+        // Log activity
+        await query(`
+            INSERT INTO activity_logs (user_id, action, details, ip_address, user_agent)
+            VALUES ($1, $2, $3, $4, $5)
+        `, [
+            userId,
+            'publish_website',
+            JSON.stringify({
+                websiteId,
+                subdomain: website.subdomain
+            }),
+            req.ip,
+            req.get('User-Agent')
+        ]);
+
+        res.json({
+            success: true,
+            message: 'Website published successfully',
+            data: {
+                id: website.id,
+                subdomain: website.subdomain,
+                isPublished: website.is_published,
+                url: `https://${website.subdomain}.bettercv.com`
+            }
+        });
+
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Unpublish website
+router.post('/websites/:id/unpublish', authMiddleware, async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const websiteId = req.params.id;
+
+        const result = await query(`
+            UPDATE user_sites SET
+                is_published = false,
+                updated_at = NOW()
+            WHERE id = $1 AND user_id = $2
+            RETURNING id, subdomain, is_published
+        `, [websiteId, userId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Website not found'
+            });
+        }
+
+        const website = result.rows[0];
+
+        // Log activity
+        await query(`
+            INSERT INTO activity_logs (user_id, action, details, ip_address, user_agent)
+            VALUES ($1, $2, $3, $4, $5)
+        `, [
+            userId,
+            'unpublish_website',
+            JSON.stringify({
+                websiteId,
+                subdomain: website.subdomain
+            }),
+            req.ip,
+            req.get('User-Agent')
+        ]);
+
+        res.json({
+            success: true,
+            message: 'Website unpublished successfully',
+            data: {
+                id: website.id,
+                isPublished: website.is_published
+            }
+        });
+
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Duplicate website
+router.post('/websites/:id/duplicate', authMiddleware, async (req, res, next) => {
+    const client = await getClient();
+
+    try {
+        const userId = req.user.id;
+        const websiteId = req.params.id;
+
+        await client.query('BEGIN');
+
+        // Get original website
+        const originalResult = await client.query(
+            'SELECT * FROM user_sites WHERE id = $1 AND user_id = $2',
+            [websiteId, userId]
+        );
+
+        if (originalResult.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({
+                success: false,
+                message: 'Website not found'
+            });
+        }
+
+        const original = originalResult.rows[0];
+
+        // Generate unique subdomain
+        let newSubdomain = `${original.subdomain}-copy`;
+        let counter = 1;
+
+        while (true) {
+            const check = await client.query(
+                'SELECT id FROM user_sites WHERE subdomain = $1',
+                [newSubdomain]
+            );
+
+            if (check.rows.length === 0) break;
+
+            newSubdomain = `${original.subdomain}-copy-${counter}`;
+            counter++;
+        }
+
+        // Create duplicate
+        const duplicateResult = await client.query(`
+            INSERT INTO user_sites (
+                user_id,
+                template_id,
+                cv_data_id,
+                site_title,
+                subdomain,
+                theme_colors,
+                is_published
+            ) VALUES ($1, $2, $3, $4, $5, $6, false)
+            RETURNING *
+        `, [
+            userId,
+            original.template_id,
+            original.cv_data_id,
+            `${original.site_title} (Copy)`,
+            newSubdomain,
+            original.theme_colors
+        ]);
+
+        const duplicate = duplicateResult.rows[0];
+
+        await client.query('COMMIT');
+
+        // Log activity
+        await query(`
+            INSERT INTO activity_logs (user_id, action, details, ip_address, user_agent)
+            VALUES ($1, $2, $3, $4, $5)
+        `, [
+            userId,
+            'duplicate_website',
+            JSON.stringify({
+                originalId: websiteId,
+                duplicateId: duplicate.id,
+                originalSubdomain: original.subdomain,
+                newSubdomain: newSubdomain
+            }),
+            req.ip,
+            req.get('User-Agent')
+        ]);
+
+        res.json({
+            success: true,
+            message: 'Website duplicated successfully',
+            data: {
+                id: duplicate.id,
+                siteTitle: duplicate.site_title,
+                subdomain: duplicate.subdomain,
+                isPublished: duplicate.is_published
+            }
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        next(error);
+    } finally {
+        client.release();
+    }
+});
+
+// Get all websites for user
+router.get('/websites', authMiddleware, async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const { sort = 'updated_at', order = 'DESC', filter } = req.query;
+
+        // Build query
+        let queryText = `
+            SELECT
+                us.*,
+                t.name as template_name,
+                cv.file_name as cv_file_name
+            FROM user_sites us
+            LEFT JOIN templates t ON us.template_id = t.id
+            LEFT JOIN cv_data cv ON us.cv_data_id = cv.id
+            WHERE us.user_id = $1
+        `;
+
+        const params = [userId];
+
+        // Add filter if specified
+        if (filter === 'published') {
+            queryText += ' AND us.is_published = true';
+        } else if (filter === 'unpublished') {
+            queryText += ' AND us.is_published = false';
+        }
+
+        // Add sorting
+        const validSortFields = ['created_at', 'updated_at', 'site_title', 'view_count'];
+        const sortField = validSortFields.includes(sort) ? sort : 'updated_at';
+        const sortOrder = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+        queryText += ` ORDER BY us.${sortField} ${sortOrder}`;
+
+        const result = await query(queryText, params);
+
+        res.json({
+            success: true,
+            data: result.rows
+        });
+
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Get single website
+router.get('/websites/:id', authMiddleware, async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const websiteId = req.params.id;
+
+        const result = await query(`
+            SELECT
+                us.*,
+                t.name as template_name,
+                cv.file_name as cv_file_name
+            FROM user_sites us
+            LEFT JOIN templates t ON us.template_id = t.id
+            LEFT JOIN cv_data cv ON us.cv_data_id = cv.id
+            WHERE us.id = $1 AND us.user_id = $2
+        `, [websiteId, userId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Website not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            data: result.rows[0]
+        });
+
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Delete website
+router.delete('/websites/:id', authMiddleware, async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const websiteId = req.params.id;
+
+        // Get website info before deleting
+        const websiteResult = await query(
+            'SELECT subdomain FROM user_sites WHERE id = $1 AND user_id = $2',
+            [websiteId, userId]
+        );
+
+        if (websiteResult.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Website not found'
+            });
+        }
+
+        const subdomain = websiteResult.rows[0].subdomain;
+
+        // Delete website (cascade will handle versions)
+        await query(
+            'DELETE FROM user_sites WHERE id = $1 AND user_id = $2',
+            [websiteId, userId]
+        );
+
+        // Log activity
+        await query(`
+            INSERT INTO activity_logs (user_id, action, details, ip_address, user_agent)
+            VALUES ($1, $2, $3, $4, $5)
+        `, [
+            userId,
+            'delete_website',
+            JSON.stringify({
+                websiteId,
+                subdomain
+            }),
+            req.ip,
+            req.get('User-Agent')
+        ]);
+
+        res.json({
+            success: true,
+            message: 'Website deleted successfully'
+        });
+
+    } catch (error) {
+        next(error);
+    }
+});
+
 // Get website analytics
 router.get('/websites/:id/analytics', authMiddleware, async (req, res, next) => {
     try {
