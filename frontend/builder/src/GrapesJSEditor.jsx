@@ -2,22 +2,76 @@ import React, { useEffect, useRef } from 'react';
 import grapesjs from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
 import gjsPresetWebpage from 'grapesjs-preset-webpage';
-import './GrapesJSFix.css';
+import './GrapesJSEditor.css';
 
-const GrapesJSEditor = () => {
+/**
+ * GrapeJS Editor - Official Demo Style (Dark Mode)
+ * Mimics https://grapesjs.com/demo.html exactly
+ */
+const GrapesJSEditor = ({ projectId, initialData, onSave }) => {
   const editorRef = useRef(null);
+  const editorInstance = useRef(null);
 
   useEffect(() => {
+    if (!editorRef.current || editorInstance.current) return;
+
+    // Initialize GrapeJS with official demo configuration
     const editor = grapesjs.init({
       container: editorRef.current,
-      height: '100%',
+      height: '100vh',
       width: 'auto',
-      fromElement: false,
 
-      // Storage
-      storageManager: false,
+      // Use official webpage preset
+      plugins: [gjsPresetWebpage],
+      pluginsOpts: {
+        'gjs-preset-webpage': {
+          modalImportTitle: 'Import Template',
+          modalImportLabel: '<div style="margin-bottom: 10px; font-size: 13px;">Paste here your HTML/CSS and click Import</div>',
+          modalImportContent: function(editor) {
+            return editor.getHtml() + '<style>'+editor.getCss()+'</style>'
+          },
+        }
+      },
 
-      // Device Manager (responsive)
+      // Storage - will integrate with your backend
+      storageManager: {
+        type: 'remote',
+        stepsBeforeSave: 3,
+        autosave: true,
+        autoload: true,
+
+        // Custom storage handlers
+        urlStore: `/api/builder/projects/${projectId}/save`,
+        urlLoad: `/api/builder/projects/${projectId}/load`,
+
+        // Headers for auth
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Content-Type': 'application/json',
+        },
+
+        // Custom store/load logic
+        async store(data) {
+          if (onSave) {
+            await onSave(data);
+          }
+          return data;
+        },
+
+        async load() {
+          return initialData || {};
+        }
+      },
+
+      // Canvas settings
+      canvas: {
+        styles: [
+          'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
+        ],
+        scripts: []
+      },
+
+      // Device manager for responsive preview
       deviceManager: {
         devices: [{
           name: 'Desktop',
@@ -25,720 +79,262 @@ const GrapesJSEditor = () => {
         }, {
           name: 'Tablet',
           width: '768px',
+          widthMedia: '992px',
         }, {
           name: 'Mobile',
-          width: '375px',
+          width: '320px',
+          widthMedia: '480px',
         }]
       },
 
-      // Panels
-      panels: {
-        defaults: []
-      },
-
-      // Put blocks in our custom sidebar
+      // Block manager with CV-specific blocks
       blockManager: {
-        appendTo: '#blocks'
+        blocks: [
+          {
+            id: 'section',
+            label: '<div><svg viewBox="0 0 24 24"><path fill="currentColor" d="M2 20h20v-4H2v4zm2-3h2v2H4v-2zM2 4v4h20V4H2zm4 3H4V5h2v2zm-4 7h20v-4H2v4zm2-3h2v2H4v-2z"></path></svg><div>Section</div></div>',
+            category: 'Basic',
+            content: '<section style="padding:50px 20px;"><h1>Insert your title here</h1><p>Insert your text here</p></section>'
+          },
+          {
+            id: 'text',
+            label: '<div><svg viewBox="0 0 24 24"><path fill="currentColor" d="M18.5,4L19.66,8.35L18.7,8.61C18.25,7.74 17.79,6.87 17.26,6.43C16.73,6 16.11,6 15.5,6H13V16.5C13,17 13,17.5 13.33,17.75C13.67,18 14.33,18 15,18V19H9V18C9.67,18 10.33,18 10.67,17.75C11,17.5 11,17 11,16.5V6H8.5C7.89,6 7.27,6 6.74,6.43C6.21,6.87 5.75,7.74 5.3,8.61L4.34,8.35L5.5,4H18.5Z"></path></svg><div>Text</div></div>',
+            category: 'Basic',
+            content: '<div style="padding:10px;">Insert your text here</div>'
+          },
+          {
+            id: 'image',
+            label: '<div><svg viewBox="0 0 24 24"><path fill="currentColor" d="M21,3H3C2,3 1,4 1,5V19A2,2 0 0,0 3,21H21C22,21 23,20 23,19V5C23,4 22,3 21,3M5,17L8.5,12.5L11,15.5L14.5,11L19,17H5Z"></path></svg><div>Image</div></div>',
+            category: 'Basic',
+            activate: true,
+            content: { type: 'image' }
+          },
+          {
+            id: 'video',
+            label: '<div><svg viewBox="0 0 24 24"><path fill="currentColor" d="M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z"></path></svg><div>Video</div></div>',
+            category: 'Basic',
+            content: { type: 'video' }
+          },
+          {
+            id: 'map',
+            label: '<div><svg viewBox="0 0 24 24"><path fill="currentColor" d="M20.5,3L20.34,3.03L15,5.1L9,3L3.36,4.9C3.15,4.97 3,5.15 3,5.38V20.5A0.5,0.5 0 0,0 3.5,21L3.66,20.97L9,18.9L15,21L20.64,19.1C20.85,19.03 21,18.85 21,18.62V3.5A0.5,0.5 0 0,0 20.5,3Z"></path></svg><div>Map</div></div>',
+            category: 'Basic',
+            content: { type: 'map' }
+          },
+          {
+            id: 'link',
+            label: '<div><svg viewBox="0 0 24 24"><path fill="currentColor" d="M3.9,12C3.9,10.29 5.29,8.9 7,8.9H11V7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H11V15.1H7C5.29,15.1 3.9,13.71 3.9,12M8,13H16V11H8V13M17,7H13V8.9H17C18.71,8.9 20.1,10.29 20.1,12C20.1,13.71 18.71,15.1 17,15.1H13V17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7Z"></path></svg><div>Link</div></div>',
+            category: 'Basic',
+            content: { type: 'link', content: 'Link' }
+          },
+        ]
       },
 
-      // Put other panels in the right sidebar
+      // Layer manager
       layerManager: {
-        appendTo: '.layers-container'
+        appendTo: '#layers-container'
       },
-      selectorManager: {
-        appendTo: '.styles-container'
+
+      // Panels configuration (official demo style)
+      panels: {
+        defaults: [
+          {
+            id: 'basic-actions',
+            el: '.panel__basic-actions',
+            buttons: [
+              {
+                id: 'visibility',
+                active: true,
+                className: 'btn-toggle-borders',
+                label: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M15,21H9V18H15M12,2A9,9 0 0,0 3,11A9,9 0 0,0 12,20A9,9 0 0,0 21,11A9,9 0 0,0 12,2M12,4A7,7 0 0,1 19,11A7,7 0 0,1 12,18A7,7 0 0,1 5,11A7,7 0 0,1 12,4Z"></path></svg>',
+                command: 'sw-visibility',
+                context: 'sw-visibility',
+                attributes: { title: 'View components' },
+              },
+              {
+                id: 'export',
+                className: 'btn-open-export',
+                label: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z"></path></svg>',
+                command: 'export-template',
+                attributes: { title: 'View code' },
+              },
+              {
+                id: 'show-json',
+                className: 'btn-show-json',
+                label: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M5,3H7V5H5V10A2,2 0 0,1 3,12A2,2 0 0,1 5,14V19H7V21H5C3.93,20.73 3,20.1 3,19V15A2,2 0 0,0 1,13H0V11H1A2,2 0 0,0 3,9V5A2,2 0 0,1 5,3M19,3A2,2 0 0,1 21,5V9A2,2 0 0,0 23,11H24V13H23A2,2 0 0,0 21,15V19A2,2 0 0,1 19,21H17V19H19V14A2,2 0 0,1 21,12A2,2 0 0,1 19,10V5H17V3H19M12,15A1,1 0 0,1 13,16A1,1 0 0,1 12,17A1,1 0 0,1 11,16A1,1 0 0,1 12,15M8,15A1,1 0 0,1 9,16A1,1 0 0,1 8,17A1,1 0 0,1 7,16A1,1 0 0,1 8,15M16,15A1,1 0 0,1 17,16A1,1 0 0,1 16,17A1,1 0 0,1 15,16A1,1 0 0,1 16,15Z"></path></svg>',
+                context: 'show-json',
+                command(editor) {
+                  editor.Modal.setTitle('Components JSON')
+                    .setContent(`<textarea style="width:100%; height: 250px;">
+                      ${JSON.stringify(editor.getComponents())}
+                    </textarea>`)
+                    .open();
+                },
+                attributes: { title: 'Show JSON' },
+              },
+            ],
+          },
+          {
+            id: 'panel-devices',
+            el: '.panel__devices',
+            buttons: [
+              {
+                id: 'device-desktop',
+                label: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M21,16H3V4H21M21,2H3C1.89,2 1,2.89 1,4V16A2,2 0 0,0 3,18H10V20H8V22H16V20H14V18H21A2,2 0 0,0 23,16V4C23,2.89 22.1,2 21,2Z"></path></svg>',
+                command: 'set-device-desktop',
+                active: true,
+                togglable: false,
+              },
+              {
+                id: 'device-tablet',
+                label: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19,18H5V6H19M21,4H3C1.89,4 1,4.89 1,6V18A2,2 0 0,0 3,20H21A2,2 0 0,0 23,18V6C23,4.89 22.1,4 21,4Z"></path></svg>',
+                command: 'set-device-tablet',
+                togglable: false,
+              },
+              {
+                id: 'device-mobile',
+                label: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M17,19H7V5H17M17,1H7C5.89,1 5,1.89 5,3V21A2,2 0 0,0 7,23H17A2,2 0 0,0 19,21V3C19,1.89 18.1,1 17,1Z"></path></svg>',
+                command: 'set-device-mobile',
+                togglable: false,
+              },
+            ],
+          },
+        ],
       },
+
+      // Style manager
       styleManager: {
-        appendTo: '.styles-container',
-        sectors: [{
-          name: 'General',
-          open: false,
-          buildProps: ['float', 'display', 'position', 'top', 'right', 'left', 'bottom']
-        }, {
-          name: 'Dimension',
-          open: false,
-          buildProps: ['width', 'height', 'max-width', 'min-height', 'margin', 'padding'],
-        }, {
-          name: 'Typography',
-          open: false,
-          buildProps: ['font-family', 'font-size', 'font-weight', 'letter-spacing', 'color', 'line-height', 'text-align', 'text-shadow'],
-        }, {
-          name: 'Decorations',
-          open: false,
-          buildProps: ['border-radius-c', 'background-color', 'border-radius', 'border', 'box-shadow', 'background'],
-        }, {
-          name: 'Extra',
-          open: false,
-          buildProps: ['transition', 'perspective', 'transform'],
-        }]
+        appendTo: '#styles-container',
+        sectors: [
+          {
+            name: 'General',
+            open: false,
+            buildProps: ['float', 'display', 'position', 'top', 'right', 'left', 'bottom']
+          },
+          {
+            name: 'Dimension',
+            open: false,
+            buildProps: ['width', 'height', 'max-width', 'min-height', 'margin', 'padding'],
+          },
+          {
+            name: 'Typography',
+            open: false,
+            buildProps: ['font-family', 'font-size', 'font-weight', 'letter-spacing', 'color', 'line-height', 'text-align', 'text-decoration', 'text-shadow'],
+          },
+          {
+            name: 'Decorations',
+            open: false,
+            buildProps: ['background-color', 'border-radius', 'border', 'box-shadow', 'background'],
+          },
+          {
+            name: 'Extra',
+            open: false,
+            buildProps: ['transition', 'perspective', 'transform'],
+          }
+        ]
       },
+
+      // Trait manager
       traitManager: {
-        appendTo: '.traits-container'
-      }
-    });
-
-    // Auto-save functionality
-    const AUTOSAVE_KEY = 'bettercv-autosave';
-    const AUTOSAVE_INTERVAL = 5000; // Save every 5 seconds
-
-    // Load saved design on init
-    const savedDesign = localStorage.getItem(AUTOSAVE_KEY);
-    if (savedDesign) {
-      try {
-        const data = JSON.parse(savedDesign);
-        editor.setComponents(data.html);
-        editor.setStyle(data.css);
-        console.log('Loaded saved design from', new Date(data.timestamp).toLocaleString());
-      } catch (e) {
-        console.error('Failed to load autosave:', e);
-        // Add initial content if load fails
-        editor.addComponents(`
-          <div style="padding: 40px; text-align: center; color: #999; min-height: 300px;">
-            <h2>Drag components here to start building</h2>
-            <p>Your work is automatically saved every 5 seconds</p>
-          </div>
-        `);
-      }
-    } else {
-      // Add initial content if no saved design
-      editor.addComponents(`
-        <div style="padding: 40px; text-align: center; color: #999; min-height: 300px;">
-          <h2>Drag components here to start building</h2>
-          <p>Your work is automatically saved every 5 seconds</p>
-        </div>
-      `);
-    }
-
-    // Auto-save on changes
-    let saveTimeout;
-    editor.on('update', () => {
-      clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(() => {
-        const design = {
-          html: editor.getHtml(),
-          css: editor.getCss(),
-          timestamp: Date.now()
-        };
-        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(design));
-        console.log('Auto-saved at', new Date().toLocaleTimeString());
-      }, AUTOSAVE_INTERVAL);
-    });
-
-    // Keyboard shortcuts
-    let copiedComponent = null;
-
-    document.addEventListener('keydown', (e) => {
-      const selected = editor.getSelected();
-
-      // Delete - Remove selected component
-      if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (selected && !e.target.matches('input, textarea')) {
-          e.preventDefault();
-          selected.remove();
-        }
-      }
-
-      // Ctrl+Z / Cmd+Z - Undo
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-        e.preventDefault();
-        editor.UndoManager.undo();
-      }
-
-      // Ctrl+Y / Cmd+Shift+Z - Redo
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) {
-        e.preventDefault();
-        editor.UndoManager.redo();
-      }
-
-      // Ctrl+C / Cmd+C - Copy component
-      if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
-        if (selected && !e.target.matches('input, textarea')) {
-          e.preventDefault();
-          copiedComponent = selected.clone();
-          console.log('Component copied');
-        }
-      }
-
-      // Ctrl+V / Cmd+V - Paste component
-      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-        if (copiedComponent && !e.target.matches('input, textarea')) {
-          e.preventDefault();
-          const parent = selected ? selected.parent() : editor.getWrapper();
-          const pasted = copiedComponent.clone();
-          parent.append(pasted);
-          editor.select(pasted);
-          console.log('Component pasted');
-        }
-      }
-
-      // Ctrl+D / Cmd+D - Duplicate selected component
-      if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
-        if (selected && !e.target.matches('input, textarea')) {
-          e.preventDefault();
-          const clone = selected.clone();
-          selected.parent().append(clone);
-          editor.select(clone);
-          console.log('Component duplicated');
-        }
-      }
-    });
-
-    // Add right-click context menu
-    editor.on('component:selected', (component) => {
-      // Remove any existing context menu
-      const existingMenu = document.getElementById('custom-context-menu');
-      if (existingMenu) existingMenu.remove();
-    });
-
-    // Enable text editing on all text elements
-    editor.on('component:add', (component) => {
-      enableTextEditing(component, editor);
-    });
-
-    // Enable editing on initial components
-    editor.getWrapper().onAll(component => {
-      enableTextEditing(component, editor);
-    });
-
-    // Function to enable text editing
-    function enableTextEditing(component, editor) {
-      const el = component.getEl();
-      if (el && (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' ||
-                 el.tagName === 'H4' || el.tagName === 'H5' || el.tagName === 'P' ||
-                 el.tagName === 'SPAN' || el.tagName === 'DIV' || el.tagName === 'A')) {
-
-        component.set('editable', true);
-
-        el.addEventListener('dblclick', (e) => {
-          e.stopPropagation();
-          const currentText = el.innerText;
-          const newText = prompt('Edit text:', currentText);
-          if (newText !== null && newText !== currentText) {
-            component.components(newText);
-            editor.trigger('change:canvasOffset');
-          }
-        });
-      }
-    }
-
-    // Listen for right-click on canvas
-    editor.on('load', () => {
-      setTimeout(() => {
-        const canvas = editor.Canvas.getFrameEl();
-        const canvasDoc = canvas.contentDocument || canvas.contentWindow.document;
-
-        canvasDoc.addEventListener('contextmenu', (e) => {
-          e.preventDefault();
-
-          const target = e.target;
-          const component = editor.getWrapper().find(target)[0];
-
-          if (component) {
-            editor.select(component);
-            showContextMenu(e, component, editor);
-          }
-        });
-      }, 100);
-    });
-
-    // Show context menu function
-    function showContextMenu(e, component, editor) {
-      // Remove existing menu
-      const existingMenu = document.getElementById('custom-context-menu');
-      if (existingMenu) existingMenu.remove();
-
-      // Create menu
-      const menu = document.createElement('div');
-      menu.id = 'custom-context-menu';
-      menu.style.cssText = `
-        position: fixed;
-        left: ${e.clientX}px;
-        top: ${e.clientY}px;
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 10000;
-        min-width: 180px;
-        padding: 8px 0;
-      `;
-
-      const menuItems = [
-        {
-          label: 'Delete',
-          icon: '🗑️',
-          action: () => {
-            component.remove();
-            menu.remove();
-          }
-        },
-        {
-          label: 'Duplicate',
-          icon: '📋',
-          action: () => {
-            const clone = component.clone();
-            component.parent().append(clone);
-            menu.remove();
-          }
-        },
-        {
-          label: 'Move Up',
-          icon: '⬆️',
-          action: () => {
-            const parent = component.parent();
-            const index = component.index();
-            if (index > 0) {
-              parent.append(component, { at: index - 1 });
-            }
-            menu.remove();
-          }
-        },
-        {
-          label: 'Move Down',
-          icon: '⬇️',
-          action: () => {
-            const parent = component.parent();
-            const index = component.index();
-            const siblings = parent.components();
-            if (index < siblings.length - 1) {
-              parent.append(component, { at: index + 2 });
-            }
-            menu.remove();
-          }
-        },
-        {
-          label: 'Change Background',
-          icon: '🎨',
-          action: () => {
-            const color = prompt('Enter background color (e.g., #667eea, white, rgb(255,0,0))');
-            if (color) {
-              component.addStyle({ 'background-color': color });
-            }
-            menu.remove();
-          }
-        },
-        {
-          label: 'Edit Text',
-          icon: '✏️',
-          action: () => {
-            const text = prompt('Enter new text', component.view.el.innerText);
-            if (text !== null) {
-              component.components(text);
-            }
-            menu.remove();
-          }
-        }
-      ];
-
-      menuItems.forEach(item => {
-        const menuItem = document.createElement('div');
-        menuItem.style.cssText = `
-          padding: 10px 16px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-size: 14px;
-          color: #1a1a1a;
-          transition: background-color 0.2s;
-        `;
-        menuItem.innerHTML = `<span>${item.icon}</span><span>${item.label}</span>`;
-
-        menuItem.addEventListener('mouseenter', () => {
-          menuItem.style.backgroundColor = '#f8f9fa';
-        });
-
-        menuItem.addEventListener('mouseleave', () => {
-          menuItem.style.backgroundColor = 'transparent';
-        });
-
-        menuItem.addEventListener('click', item.action);
-        menu.appendChild(menuItem);
-      });
-
-      document.body.appendChild(menu);
-
-      // Close menu on click outside
-      setTimeout(() => {
-        document.addEventListener('click', function closeMenu() {
-          menu.remove();
-          document.removeEventListener('click', closeMenu);
-        });
-      }, 100);
-    }
-
-    // Image upload functionality
-    editor.on('asset:open', () => {
-      const assetManager = editor.AssetManager;
-
-      // Add custom upload button
-      const uploadContainer = document.createElement('div');
-      uploadContainer.innerHTML = `
-        <div style="padding: 20px; text-align: center; border: 2px dashed #e1e4e8; border-radius: 8px; margin: 10px;">
-          <input type="file" id="image-upload-input" accept="image/*" style="display: none;" multiple />
-          <button id="upload-btn" style="padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
-            Upload Images
-          </button>
-          <p style="margin: 10px 0 0 0; font-size: 13px; color: #64748b;">or drag and drop images here</p>
-        </div>
-      `;
-
-      const modalContent = document.querySelector('.gjs-am-assets-cont');
-      if (modalContent && !document.getElementById('upload-btn')) {
-        modalContent.insertBefore(uploadContainer, modalContent.firstChild);
-
-        const uploadBtn = document.getElementById('upload-btn');
-        const fileInput = document.getElementById('image-upload-input');
-
-        uploadBtn.addEventListener('click', () => fileInput.click());
-
-        fileInput.addEventListener('change', (e) => {
-          const files = Array.from(e.target.files);
-          files.forEach(file => {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              assetManager.add({
-                src: event.target.result,
-                name: file.name,
-                type: 'image'
-              });
-            };
-            reader.readAsDataURL(file);
-          });
-        });
-
-        // Drag and drop
-        uploadContainer.addEventListener('dragover', (e) => {
-          e.preventDefault();
-          uploadContainer.style.borderColor = '#667eea';
-          uploadContainer.style.backgroundColor = '#f8f9fa';
-        });
-
-        uploadContainer.addEventListener('dragleave', () => {
-          uploadContainer.style.borderColor = '#e1e4e8';
-          uploadContainer.style.backgroundColor = 'transparent';
-        });
-
-        uploadContainer.addEventListener('drop', (e) => {
-          e.preventDefault();
-          uploadContainer.style.borderColor = '#e1e4e8';
-          uploadContainer.style.backgroundColor = 'transparent';
-
-          const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-          files.forEach(file => {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              assetManager.add({
-                src: event.target.result,
-                name: file.name,
-                type: 'image'
-              });
-            };
-            reader.readAsDataURL(file);
-          });
-        });
-      }
-    });
-
-    // Add image block that opens asset manager
-    editor.BlockManager.add('image-upload', {
-      label: 'Image',
-      category: 'Basic',
-      content: {
-        type: 'image',
-        activeOnRender: 1
+        appendTo: '#traits-container'
       },
-      attributes: { class: 'fa fa-image' }
     });
 
-    // Custom blocks for CV
-    editor.BlockManager.add('cv-hero', {
-      label: 'Hero Section',
-      category: 'CV Components',
-      content: `
-        <section style="padding: 100px 20px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-          <h1 style="font-size: 48px; margin-bottom: 20px;">Your Name</h1>
-          <p style="font-size: 20px; margin-bottom: 30px;">Your Title / Role</p>
-          <a href="#contact" style="padding: 15px 30px; background: white; color: #667eea; text-decoration: none; border-radius: 5px; font-weight: bold;">Get In Touch</a>
-        </section>
-      `,
-      attributes: { class: 'fa fa-header' }
+    // Commands
+    editor.Commands.add('set-device-desktop', {
+      run: editor => editor.setDevice('Desktop')
+    });
+    editor.Commands.add('set-device-tablet', {
+      run: editor => editor.setDevice('Tablet')
+    });
+    editor.Commands.add('set-device-mobile', {
+      run: editor => editor.setDevice('Mobile')
     });
 
-    editor.BlockManager.add('cv-experience', {
-      label: 'Experience Card',
-      category: 'CV Components',
-      content: `
-        <div style="padding: 24px; background: white; border-left: 4px solid #667eea; border-radius: 8px; margin: 20px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-          <h3 style="margin: 0 0 8px 0; font-size: 20px;">Position Title</h3>
-          <div style="color: #667eea; font-weight: 600; margin-bottom: 8px;">Company Name</div>
-          <div style="color: #666; font-size: 14px; margin-bottom: 12px;">Jan 2023 - Present</div>
-          <p style="font-size: 14px; line-height: 1.6; color: #333;">Description of your role and achievements...</p>
-        </div>
-      `,
-      attributes: { class: 'fa fa-briefcase' }
-    });
-
-    editor.BlockManager.add('cv-project', {
-      label: 'Project Card',
-      category: 'CV Components',
-      content: `
-        <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin: 20px; max-width: 400px;">
-          <img src="https://via.placeholder.com/400x200" style="width: 100%; height: 200px; object-fit: cover;" />
-          <div style="padding: 20px;">
-            <h3 style="margin: 0 0 12px 0; font-size: 20px;">Project Name</h3>
-            <p style="font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 16px;">Project description goes here...</p>
-            <div style="display: flex; gap: 12px;">
-              <a href="#" style="padding: 8px 16px; background: #333; color: white; text-decoration: none; border-radius: 6px; font-size: 14px;">GitHub</a>
-              <a href="#" style="padding: 8px 16px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-size: 14px;">Live Demo</a>
-            </div>
-          </div>
-        </div>
-      `,
-      attributes: { class: 'fa fa-rocket' }
-    });
-
-    editor.BlockManager.add('cv-skills', {
-      label: 'Skills Grid',
-      category: 'CV Components',
-      content: `
-        <section style="padding: 60px 20px; background: #f8f9fa;">
-          <h2 style="font-size: 32px; text-align: center; margin-bottom: 30px;">Skills</h2>
-          <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; max-width: 1000px; margin: 0 auto;">
-            <span style="padding: 10px 20px; background: #667eea; color: white; border-radius: 20px; font-size: 14px; font-weight: 600;">JavaScript</span>
-            <span style="padding: 10px 20px; background: #667eea; color: white; border-radius: 20px; font-size: 14px; font-weight: 600;">React</span>
-            <span style="padding: 10px 20px; background: #667eea; color: white; border-radius: 20px; font-size: 14px; font-weight: 600;">Node.js</span>
-            <span style="padding: 10px 20px; background: #667eea; color: white; border-radius: 20px; font-size: 14px; font-weight: 600;">Python</span>
-            <span style="padding: 10px 20px; background: #667eea; color: white; border-radius: 20px; font-size: 14px; font-weight: 600;">SQL</span>
-          </div>
-        </section>
-      `,
-      attributes: { class: 'fa fa-star' }
-    });
-
-    editor.BlockManager.add('cv-contact', {
-      label: 'Contact Section',
-      category: 'CV Components',
-      content: `
-        <section style="padding: 80px 20px; background: #1a1a1a; color: white;">
-          <div style="max-width: 800px; margin: 0 auto; text-align: center;">
-            <h2 style="font-size: 36px; margin-bottom: 20px;">Get In Touch</h2>
-            <p style="font-size: 18px; margin-bottom: 40px; color: #ccc;">Let's work together on your next project</p>
-            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-              <a href="mailto:you@email.com" style="padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">📧 Email</a>
-              <a href="https://linkedin.com" style="padding: 12px 24px; background: #0077b5; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">💼 LinkedIn</a>
-              <a href="https://github.com" style="padding: 12px 24px; background: #333; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">💻 GitHub</a>
-            </div>
-          </div>
-        </section>
-      `,
-      attributes: { class: 'fa fa-envelope' }
-    });
-
-    editor.BlockManager.add('cv-education', {
-      label: 'Education Card',
-      category: 'CV Components',
-      content: `
-        <div style="padding: 24px; background: #f8f9fa; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin: 0 0 8px 0; font-size: 20px; color: #1a1a1a;">Degree Name</h3>
-          <div style="color: #667eea; font-weight: 600; margin-bottom: 8px;">University Name</div>
-          <div style="color: #666; font-size: 14px; margin-bottom: 12px;">2019 - 2023</div>
-          <p style="font-size: 14px; line-height: 1.6; color: #333;">Major or relevant coursework...</p>
-        </div>
-      `,
-      attributes: { class: 'fa fa-graduation-cap' }
-    });
-
-    // Export command
+    // Export template command
     editor.Commands.add('export-template', {
-      run(editor) {
+      run(editor, sender) {
+        sender && sender.set('active', 0);
         const html = editor.getHtml();
         const css = editor.getCss();
-        const fullHtml = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio</title>
-  <style>${css}</style>
-</head>
-<body>
-  ${html}
-</body>
-</html>`;
-
-        const blob = new Blob([fullHtml], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'portfolio.html';
-        link.click();
-        URL.revokeObjectURL(url);
+        editor.Modal.setTitle('Code Export')
+          .setContent(`
+            <div style="padding: 20px;">
+              <h3 style="margin-top:0">HTML</h3>
+              <textarea readonly style="width:100%; height: 200px; font-family: monospace; font-size: 12px; padding: 10px; background: #282828; color: #f8f8f2; border: 1px solid #444;">${html}</textarea>
+              <h3 style="margin-top:20px">CSS</h3>
+              <textarea readonly style="width:100%; height: 200px; font-family: monospace; font-size: 12px; padding: 10px; background: #282828; color: #f8f8f2; border: 1px solid #444;">${css}</textarea>
+            </div>
+          `)
+          .open();
       }
     });
 
-    // Store editor instance for access from App.jsx
-    window.grapesJSEditor = editor;
+    // Load initial data if provided
+    if (initialData) {
+      if (initialData.html) editor.setComponents(initialData.html);
+      if (initialData.css) editor.setStyle(initialData.css);
+    }
 
+    // Store editor instance
+    editorInstance.current = editor;
+    window.grapesjsEditor = editor; // For external access
+
+    // Cleanup
     return () => {
-      editor.destroy();
+      if (editorInstance.current) {
+        editorInstance.current.destroy();
+        editorInstance.current = null;
+      }
     };
-  }, []);
+  }, [projectId, initialData, onSave]);
 
   return (
-    <div style={{ display: 'flex', height: '100%', background: '#fafbfc' }}>
-      {/* Left Sidebar - Blocks */}
-      <div style={{
-        width: '300px',
-        background: '#ffffff',
-        borderRight: '1px solid #e1e4e8',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden'
-      }}>
-        <div style={{
-          padding: '24px 20px',
-          borderBottom: '1px solid #e1e4e8',
-          background: '#ffffff'
-        }}>
-          <h3 style={{
-            margin: 0,
-            fontSize: '18px',
-            fontWeight: '700',
-            color: '#0f172a',
-            letterSpacing: '-0.02em'
-          }}>
-            Components
-          </h3>
-          <p style={{
-            margin: '8px 0 0 0',
-            fontSize: '14px',
-            color: '#64748b',
-            lineHeight: '1.5'
-          }}>
-            Drag components to build your design
-          </p>
-        </div>
-        <div id="blocks" style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '20px',
-          background: '#ffffff'
-        }}></div>
+    <div className="grapesjs-editor-wrapper">
+      {/* Top Bar */}
+      <div className="grapesjs-topbar">
+        <div className="panel__basic-actions"></div>
+        <div className="panel__devices"></div>
       </div>
 
-      {/* Main Editor */}
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        background: '#fafbfc'
-      }}>
-        <div className="panel__basic-actions" style={{
-          padding: '12px 24px',
-          background: '#ffffff',
-          borderBottom: '1px solid #e1e4e8',
-          minHeight: '56px',
-          display: 'flex',
-          alignItems: 'center'
-        }}></div>
-        <div style={{
-          flex: 1,
-          padding: '24px',
-          overflow: 'auto'
-        }}>
-          <div ref={editorRef} style={{
-            height: '100%',
-            background: '#ffffff',
-            borderRadius: '12px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)',
-            overflow: 'hidden'
-          }}></div>
-        </div>
-      </div>
-
-      {/* Right Sidebar - Layers, Styles, Traits */}
-      <div style={{
-        width: '320px',
-        background: '#ffffff',
-        borderLeft: '1px solid #e1e4e8',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden'
-      }}>
-        {/* Layers */}
-        <div style={{
-          borderBottom: '1px solid #e1e4e8',
-          maxHeight: '35%',
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '200px'
-        }}>
-          <div style={{
-            padding: '18px 20px',
-            background: '#ffffff',
-            fontWeight: '600',
-            fontSize: '15px',
-            color: '#0f172a',
-            borderBottom: '1px solid #e1e4e8'
-          }}>
-            Layers
+      {/* Main Editor Area */}
+      <div className="grapesjs-main">
+        {/* Left Sidebar - Blocks */}
+        <div className="grapesjs-sidebar grapesjs-sidebar-left">
+          <div className="grapesjs-sidebar-header">
+            <div className="grapesjs-sidebar-title">Blocks</div>
           </div>
-          <div className="layers-container" style={{
-            flex: 1,
-            overflowY: 'auto',
-            background: '#fafbfc'
-          }}></div>
+          <div id="blocks" className="grapesjs-blocks-container"></div>
         </div>
 
-        {/* Styles */}
-        <div style={{
-          borderBottom: '1px solid #e1e4e8',
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          minHeight: '250px'
-        }}>
-          <div style={{
-            padding: '18px 20px',
-            background: '#ffffff',
-            fontWeight: '600',
-            fontSize: '15px',
-            color: '#0f172a',
-            borderBottom: '1px solid #e1e4e8'
-          }}>
-            Styles
-          </div>
-          <div className="styles-container" style={{
-            flex: 1,
-            overflowY: 'auto',
-            background: '#fafbfc'
-          }}></div>
+        {/* Canvas */}
+        <div className="grapesjs-canvas-wrapper">
+          <div ref={editorRef} id="gjs"></div>
         </div>
 
-        {/* Traits */}
-        <div style={{
-          maxHeight: '30%',
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '150px'
-        }}>
-          <div style={{
-            padding: '18px 20px',
-            background: '#ffffff',
-            fontWeight: '600',
-            fontSize: '15px',
-            color: '#0f172a',
-            borderBottom: '1px solid #e1e4e8'
-          }}>
-            Settings
+        {/* Right Sidebar - Layers, Styles, Traits */}
+        <div className="grapesjs-sidebar grapesjs-sidebar-right">
+          <div className="grapesjs-tabs">
+            <div className="grapesjs-tab grapesjs-tab-active" data-tab="styles">
+              <svg viewBox="0 0 24 24"><path fill="currentColor" d="M20.71,4.63L19.37,3.29C19,2.9 18.35,2.9 17.96,3.29L9,12.25L11.75,15L20.71,6.04C21.1,5.65 21.1,5 20.71,4.63M7,14A3,3 0 0,0 4,17C4,18.31 2.84,19 2,19C2.92,20.22 4.5,21 6,21A4,4 0 0,0 10,17A3,3 0 0,0 7,14Z"></path></svg>
+            </div>
+            <div className="grapesjs-tab" data-tab="traits">
+              <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"></path></svg>
+            </div>
+            <div className="grapesjs-tab" data-tab="layers">
+              <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12,16L19.36,10.27L21,9L12,2L3,9L4.63,10.27M12,18.54L4.62,12.81L3,14.07L12,21.07L21,14.07L19.37,12.8L12,18.54Z"></path></svg>
+            </div>
           </div>
-          <div className="traits-container" style={{
-            flex: 1,
-            overflowY: 'auto',
-            background: '#fafbfc'
-          }}></div>
+
+          <div className="grapesjs-tab-content" data-content="styles">
+            <div id="styles-container"></div>
+          </div>
+          <div className="grapesjs-tab-content" data-content="traits" style="display:none;">
+            <div id="traits-container"></div>
+          </div>
+          <div className="grapesjs-tab-content" data-content="layers" style="display:none;">
+            <div id="layers-container"></div>
+          </div>
         </div>
       </div>
     </div>

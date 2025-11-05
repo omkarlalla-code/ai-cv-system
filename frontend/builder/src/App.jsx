@@ -1,123 +1,87 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import GrapesJSEditor from './GrapesJSEditor';
-import { toPng } from 'html-to-image';
 import './App.css';
 
-
+/**
+ * Builder App - Wrapper for GrapeJS Editor
+ * Handles project loading and saving
+ */
 function App() {
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [projectId, setProjectId] = useState(null);
+  const [initialData, setInitialData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleGenerateWebsite = async () => {
-    setIsGenerating(true);
+  useEffect(() => {
+    // Get project ID from URL params
+    const params = new URLSearchParams(window.location.search);
+    const pid = params.get('project') || params.get('id');
+
+    if (pid) {
+      setProjectId(pid);
+      loadProject(pid);
+    } else {
+      // No project ID, start with empty canvas
+      setLoading(false);
+    }
+  }, []);
+
+  const loadProject = async (pid) => {
     try {
-      const editor = window.grapesJSEditor;
-      if (!editor) {
-        alert('Editor not initialized');
-        setIsGenerating(false);
-        return;
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`/api/builder/projects/${pid}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setInitialData(data);
       }
-
-      // Get the canvas iframe content
-      const iframe = editor.Canvas.getFrameEl();
-      const canvasBody = iframe.contentDocument.body;
-
-      const dataUrl = await toPng(canvasBody, {
-        quality: 0.95,
-        pixelRatio: 2,
-      });
-
-      const response = await fetch(dataUrl);
-      const blob = await response.blob();
-
-      const formData = new FormData();
-      formData.append('screenshot', blob, 'design.png');
-      formData.append('builderState', JSON.stringify({
-        html: editor.getHtml(),
-        css: editor.getCss(),
-      }));
-
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      const result = await fetch(`${apiUrl}/api/builder-v2/generate-website`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!result.ok) throw new Error('Failed to generate');
-
-      const responseData = await result.json();
-
-      const htmlBlob = new Blob([responseData.html], { type: 'text/html' });
-      const url = URL.createObjectURL(htmlBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'portfolio.html';
-      link.click();
-      URL.revokeObjectURL(url);
-
-      alert('Website generated and downloaded!');
     } catch (error) {
-      console.error('Error:', error);
-      alert('Failed to generate. Make sure backend is running on port 3000 with ANTHROPIC_API_KEY set.');
+      console.error('Failed to load project:', error);
     } finally {
-      setIsGenerating(false);
+      setLoading(false);
     }
   };
 
-  const handleExportHTML = () => {
-    const editor = window.grapesJSEditor;
-    if (!editor) {
-      alert('Editor not initialized');
+  const handleSave = async (data) => {
+    if (!projectId) {
+      console.warn('No project ID, cannot save');
       return;
     }
 
-    const html = editor.getHtml();
-    const css = editor.getCss();
-    const fullHtml = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio</title>
-  <style>${css}</style>
-</head>
-<body>
-  ${html}
-</body>
-</html>`;
-
-    const blob = new Blob([fullHtml], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'portfolio.html';
-    link.click();
-    URL.revokeObjectURL(url);
+    try {
+      const token = localStorage.getItem('authToken');
+      await fetch(`/api/builder/projects/${projectId}/save`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      console.error('Failed to save:', error);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner"></div>
+        <p>Loading editor...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="app">
-      <header className="app-header">
-        <div>
-          <h1>BetterCV — Website Builder</h1>
-          <p className="header-subtitle">Visual editor for portfolio websites</p>
-        </div>
-        <div className="header-actions">
-          <button onClick={handleExportHTML} className="btn btn-secondary">
-            Export HTML
-          </button>
-          <button
-            onClick={handleGenerateWebsite}
-            className="btn btn-primary"
-            disabled={isGenerating}
-          >
-            {isGenerating ? 'Generating...' : 'AI Generate'}
-          </button>
-        </div>
-      </header>
-
-      <div className="builder-container">
-        <GrapesJSEditor />
-      </div>
+      <GrapesJSEditor
+        projectId={projectId}
+        initialData={initialData}
+        onSave={handleSave}
+      />
     </div>
   );
 }
