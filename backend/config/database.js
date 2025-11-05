@@ -2,17 +2,28 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 // PostgreSQL connection configuration
-const pool = new Pool({
-  user: process.env.DB_USER || 'cvsite_user',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'cvsite_db',
-  password: process.env.DB_PASSWORD || 'your_password_here',
-  port: process.env.DB_PORT || 5432,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  max: 20, // maximum number of clients in the pool
-  idleTimeoutMillis: 30000, // close idle clients after 30 seconds
-  connectionTimeoutMillis: 2000, // return an error after 2 seconds if connection could not be established
-});
+// Support both DATABASE_URL (cloud providers like Neon) and individual variables
+const poolConfig = process.env.DATABASE_URL
+  ? {
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
+    }
+  : {
+      user: process.env.DB_USER || 'cvsite_user',
+      host: process.env.DB_HOST || 'localhost',
+      database: process.env.DB_NAME || 'cvsite_db',
+      password: process.env.DB_PASSWORD || 'your_password_here',
+      port: process.env.DB_PORT || 5432,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
+    };
+
+const pool = new Pool(poolConfig);
 
 // Test database connection
 pool.on('connect', () => {

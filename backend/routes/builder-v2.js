@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const Anthropic = require('@anthropic-ai/sdk');
 const { pool } = require('../config/database');
+const authenticateToken = require('../middleware/auth');
 
 // Configure multer for file uploads
 const upload = multer({
@@ -21,7 +22,7 @@ const anthropic = new Anthropic({
  * POST /api/builder-v2/projects
  * Create a new project
  */
-router.post('/projects', async (req, res) => {
+router.post('/projects', authenticateToken, async (req, res) => {
   try {
     const { name, description } = req.body;
     const userId = req.user?.id; // Assumes auth middleware
@@ -44,7 +45,7 @@ router.post('/projects', async (req, res) => {
  * GET /api/builder-v2/projects
  * Get all projects for user
  */
-router.get('/projects', async (req, res) => {
+router.get('/projects', authenticateToken, async (req, res) => {
   try {
     const userId = req.user?.id;
 
@@ -70,7 +71,7 @@ router.get('/projects', async (req, res) => {
  * POST /api/builder-v2/save-version
  * Save a new design version
  */
-router.post('/save-version', upload.single('screenshot'), async (req, res) => {
+router.post('/save-version', authenticateToken, upload.single('screenshot'), async (req, res) => {
   try {
     const { projectId, builderState, commitMessage } = req.body;
     const userId = req.user?.id;
@@ -111,7 +112,7 @@ router.post('/save-version', upload.single('screenshot'), async (req, res) => {
  * GET /api/builder-v2/versions/:projectId
  * Get version history for a project
  */
-router.get('/versions/:projectId', async (req, res) => {
+router.get('/versions/:projectId', authenticateToken, async (req, res) => {
   try {
     const { projectId } = req.params;
 
@@ -136,7 +137,7 @@ router.get('/versions/:projectId', async (req, res) => {
  * GET /api/builder-v2/version/:versionId
  * Get specific version details
  */
-router.get('/version/:versionId', async (req, res) => {
+router.get('/version/:versionId', authenticateToken, async (req, res) => {
   try {
     const { versionId } = req.params;
 
@@ -163,7 +164,7 @@ router.get('/version/:versionId', async (req, res) => {
  * POST /api/builder-v2/restore-version
  * Restore a previous version as current
  */
-router.post('/restore-version', async (req, res) => {
+router.post('/restore-version', authenticateToken, async (req, res) => {
   try {
     const { versionId } = req.body;
 
@@ -206,7 +207,7 @@ router.post('/restore-version', async (req, res) => {
  * POST /api/builder-v2/generate-website
  * Generate HTML/CSS from design
  */
-router.post('/generate-website', upload.single('screenshot'), async (req, res) => {
+router.post('/generate-website', authenticateToken, upload.single('screenshot'), async (req, res) => {
   try {
     const { versionId, builderState } = req.body;
     const startTime = Date.now();
@@ -345,7 +346,7 @@ Start with <!DOCTYPE html>`;
  * POST /api/builder-v2/iterate
  * Refine generated website based on feedback
  */
-router.post('/iterate', async (req, res) => {
+router.post('/iterate', authenticateToken, async (req, res) => {
   try {
     const { websiteId, feedback } = req.body;
 

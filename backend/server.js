@@ -3,24 +3,36 @@ const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 require('dotenv').config();
 
 // Validate required environment variables
-const requiredEnvVars = [
-  'ANTHROPIC_API_KEY',
-  'JWT_SECRET',
-  'DB_NAME',
-  'DB_USER',
-  'DB_PASSWORD'
-];
+const requiredEnvVars = ['ANTHROPIC_API_KEY', 'JWT_SECRET'];
 
-const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+// Either DATABASE_URL or individual DB variables must be set
+const hasDatabaseUrl = !!process.env.DATABASE_URL;
+const hasIndividualDbVars = !!(process.env.DB_NAME && process.env.DB_USER);
 
-if (missingEnvVars.length > 0) {
+if (!hasDatabaseUrl && !hasIndividualDbVars) {
+  requiredEnvVars.push('DATABASE_URL or DB_NAME/DB_USER');
+}
+
+const missingEnvVars = requiredEnvVars.filter(varName => {
+  // Skip the special DATABASE_URL check message
+  if (varName.includes('or')) return false;
+  return !process.env[varName];
+});
+
+if (missingEnvVars.length > 0 || (!hasDatabaseUrl && !hasIndividualDbVars)) {
   console.error('❌ ERROR: Missing required environment variables:');
   missingEnvVars.forEach(varName => {
     console.error(`   - ${varName}`);
   });
+  if (!hasDatabaseUrl && !hasIndividualDbVars) {
+    console.error('   - DATABASE_URL or (DB_NAME + DB_USER)');
+  }
   console.error('\n💡 Create a .env file in the backend directory with these variables.');
   console.error('   See .env.example for reference.\n');
   process.exit(1);
@@ -34,11 +46,16 @@ const websiteRoutes = require('./routes/website');
 const templateRoutes = require('./routes/template');
 const builderRoutes = require('./routes/builder');
 const builderV2Routes = require('./routes/builder-v2');
+const adminRoutes = require('./routes/admin');
 
 // Import middleware
 const authMiddleware = require('./middleware/auth');
 const errorHandler = require('./middleware/errorHandler');
 const logger = require('./middleware/logger');
+const { setCsrfToken, verifyCsrfToken, getCsrfToken } = require('./middleware/csrf');
+const securityHeaders = require('./middleware/securityHeaders');
+const { requestLogger } = require('./middleware/requestLogger');
+const { ipWhitelist } = require('./middleware/ipWhitelist');
 
 // Import database
 const { pool } = require('./config/database');
@@ -91,6 +108,21 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Cookie parsing middleware
+app.use(cookieParser());
+
+// Additional security headers
+app.use(securityHeaders);
+
+// IP whitelist/blacklist (optional - configure via .env)
+app.use(ipWhitelist);
+
+// Request logging for security monitoring
+app.use(requestLogger);
+
+// CSRF protection middleware
+app.use(setCsrfToken);
+
 // Logging middleware
 app.use(logger);
 
@@ -118,14 +150,39 @@ app.get('/health', async (req, res) => {
     }
 });
 
-// API Routes
-app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/user', authMiddleware, userRoutes);
-app.use('/api', uploadRoutes);
-app.use('/api', websiteRoutes);
-app.use('/api/templates', templateRoutes);
-app.use('/api/builder', builderRoutes);
-app.use('/api/builder-v2', builderV2Routes);
+// Swagger UI - Interactive API Documentation
+const swaggerUiOptions = {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'BetterCV API Documentation',
+  customfavIcon: '/favicon.ico',
+  swaggerOptions: {
+    persistAuthorization: true,
+    displayRequestDuration: true,
+    filter: true,
+    tryItOutEnabled: true,
+  },
+};
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+
+// Swagger JSON endpoint
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
+// CSRF token endpoint
+app.get('/api/csrf-token', getCsrfToken);
+
+// API Routes (with CSRF protection for state-changing operations)
+app.use('/api/auth', authLimiter, verifyCsrfToken, authRoutes);
+app.use('/api/user', authMiddleware, verifyCsrfToken, userRoutes);
+app.use('/api', verifyCsrfToken, uploadRoutes);
+app.use('/api', verifyCsrfToken, websiteRoutes);
+app.use('/api/templates', verifyCsrfToken, templateRoutes);
+app.use('/api/builder', verifyCsrfToken, builderRoutes);
+app.use('/api/builder-v2', verifyCsrfToken, builderV2Routes);
+app.use('/api/admin', adminRoutes); // Admin routes (includes auth check)
 
 // Serve frontend for all non-API routes (SPA support)
 app.get('*', (req, res) => {
@@ -157,13 +214,16 @@ process.on('SIGINT', () => {
     });
 });
 
-// Start server
-const server = app.listen(PORT, () => {
-    console.log(`🚀 CVSite Server running on port ${PORT}`);
-    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🌐 Frontend: http://localhost:${PORT}`);
-    console.log(`🔗 API: http://localhost:${PORT}/api`);
-    console.log(`❤️  Health: http://localhost:${PORT}/health`);
-});
+// Start server only if not in test mode
+let server;
+if (process.env.NODE_ENV !== 'test') {
+    server = app.listen(PORT, () => {
+        console.log(`🚀 CVSite Server running on port ${PORT}`);
+        console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log(`🌐 Frontend: http://localhost:${PORT}`);
+        console.log(`🔗 API: http://localhost:${PORT}/api`);
+        console.log(`❤️  Health: http://localhost:${PORT}/health`);
+    });
+}
 
 module.exports = app;

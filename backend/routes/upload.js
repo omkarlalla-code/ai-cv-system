@@ -5,6 +5,7 @@ const fs = require('fs').promises;
 const { query } = require('../config/database');
 const CVParser = require('../services/cvParser');
 const authMiddleware = require('../middleware/auth');
+const { validateUploadedFile } = require('../middleware/fileValidation');
 
 const router = express.Router();
 
@@ -52,7 +53,7 @@ const upload = multer({
 });
 
 // CV Upload endpoint
-router.post('/upload-cv', authMiddleware, upload.single('cv'), async (req, res, next) => {
+router.post('/upload-cv', authMiddleware, upload.single('cv'), validateUploadedFile, async (req, res, next) => {
     try {
         if (!req.file) {
             return res.status(400).json({

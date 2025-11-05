@@ -1,0 +1,277 @@
+================================================================================
+BETTERCV CODEBASE - QUICK REFERENCE SUMMARY
+================================================================================
+
+PROJECT OVERVIEW:
+- Type: AI-powered CV parsing + visual website builder
+- Stack: Node.js/Express (backend), React/GrapesJS (frontend), PostgreSQL
+- Status: Early stage MVP with recent cleanup (Nov 1, 2025)
+- Overall Grade: 6/10 (Early Stage, Recent Improvements)
+
+================================================================================
+CRITICAL ISSUES (FIX IMMEDIATELY):
+================================================================================
+
+1. SECURITY: Missing Auth on /api/builder-v2/* routes
+   Location: backend/routes/builder-v2.js:24-60
+   Status: UNPROTECTED - Anyone can access all projects/versions
+   Fix: Add authMiddleware to all routes
+
+2. DEPLOYMENT: Hardcoded localhost in frontend
+   Location: frontend/builder/src/App.jsx:39
+   Status: Will break in production
+   Fix: Use environment variable for API endpoint
+
+3. ARCHITECTURE: Inconsistent error handling patterns
+   Location: Various route files
+   Status: Mixed try/catch and next(error) usage
+   Fix: Standardize to single pattern
+
+================================================================================
+HIGH PRIORITY ISSUES (FIX BEFORE PRODUCTION):
+================================================================================
+
+4. File upload validation is weak (no MIME content check, no virus scanning)
+5. No CSRF protection on state-changing operations
+6. Sensitive data (CVs, personal info) logged to console
+7. Screenshot storage in database (not scalable)
+8. Claude API model hardcoded (not configurable)
+9. Email verification prints to console (not actually sending emails)
+10. No test coverage (0% - cannot safely refactor)
+
+================================================================================
+CODE STATISTICS:
+================================================================================
+
+Backend:
+- 16 core JS files, ~2,000 lines (excluding node_modules)
+- Routes: 7 route files covering auth, upload, website, builder, templates, user
+- Services: 2 services (CVParser, WebsiteGenerator)
+- Database: 2 schema files (145 + 300 lines)
+
+Frontend:
+- React + GrapesJS builder
+- 5 component files
+- Minimal state management
+
+Dependencies:
+- 20 backend packages (mostly up-to-date, 2 old: multer, pdf-parse)
+- 4 frontend packages
+- No vulnerabilities in direct dependencies
+
+Size:
+- Backend: 133M (mostly node_modules)
+- Frontend: 69M (mostly node_modules)
+- Database: 44K
+
+================================================================================
+GRADING BY CATEGORY:
+================================================================================
+
+Architecture:        6.5/10  Good structure, missing service layers
+Code Quality:       7/10    Clean, but inconsistencies
+Database Design:    8/10    Well-designed with proper indexes
+Security:           6/10    Basics OK, but critical gaps
+API Design:         6/10    Works but inconsistent response formats
+Testing:            0/10    No tests found
+Documentation:      7.5/10  Good, but some outdated
+Deployment Ready:   3/10    Not ready for production
+
+================================================================================
+KEY FEATURES WORKING:
+================================================================================
+
+✅ User authentication (JWT-based)
+✅ CV uploading (PDF, DOCX, TXT)
+✅ CV parsing (Claude AI-powered)
+✅ Website preview generation
+✅ Visual builder (GrapesJS)
+✅ AI HTML/CSS generation
+✅ Template system
+✅ Subdomain publishing
+✅ Rate limiting
+✅ Error handling
+
+================================================================================
+KEY FEATURES MISSING:
+================================================================================
+
+❌ Email verification (prints to console)
+❌ 2FA setup endpoint
+❌ Test coverage
+❌ API documentation
+❌ Production logging
+❌ File storage (cloud)
+❌ Error tracking
+❌ Custom domains
+❌ Analytics
+❌ Collaboration features
+
+================================================================================
+RECENT CLEANUP (Commit 4cfba19):
+================================================================================
+
+Fixed:
+✅ parseWord() method bug (critical fix)
+✅ Environment validation on startup
+✅ Removed 18 unused files (5,282 lines of dead code)
+✅ Standardized builder naming (polotno → builder)
+✅ README accuracy
+
+Removed:
+- Polotno builder implementation (unused)
+- Puck builder configs (unused)
+- Konva, Canva builders (unused)
+- Multiple test files for non-existent features
+
+================================================================================
+DEPLOYMENT READINESS CHECKLIST:
+================================================================================
+
+Before Production, Must Complete:
+
+Security:
+[ ] Add auth middleware to /api/builder-v2/* routes
+[ ] Implement CSRF protection
+[ ] Add file content validation (magic bytes)
+[ ] Sanitize HTML output
+[ ] Implement structured logging without data exposure
+[ ] Remove console.logs
+[ ] Set secure headers (CSP, X-Frame-Options, etc.)
+[ ] Implement session invalidation on password change
+
+Functionality:
+[ ] Configure email sending (SendGrid/AWS SES)
+[ ] Implement cloud file storage (S3/CloudFlare)
+[ ] Add 2FA setup endpoint
+[ ] Implement account deletion
+[ ] Wire up password reset completely
+
+Testing:
+[ ] Add Jest configuration
+[ ] Write 50+ unit tests
+[ ] Write 10+ integration tests
+[ ] Add e2e tests for critical flows
+[ ] Set up CI/CD
+
+Operations:
+[ ] Add error tracking (Sentry)
+[ ] Add structured logging (Winston)
+[ ] Set up monitoring
+[ ] Create deployment guides
+[ ] Document database schema
+[ ] Create runbooks for common issues
+
+================================================================================
+EFFORT ESTIMATES:
+================================================================================
+
+To make production-ready:
+- Security hardening: 3-5 days
+- Testing infrastructure: 1-2 weeks
+- Performance optimization: 1 week
+- Deployment setup: 1-2 weeks
+- Total: ~1 month of focused work
+
+================================================================================
+FILE LOCATIONS:
+================================================================================
+
+Main Files:
+- Backend server: backend/server.js (176 lines)
+- Database config: backend/config/database.js (85 lines)
+- Auth middleware: backend/middleware/auth.js (80 lines)
+- Error handler: backend/middleware/errorHandler.js (78 lines)
+- CV Parser: backend/services/cvParser.js (263 lines)
+- Website Generator: backend/services/websiteGenerator.js (362 lines)
+
+Routes:
+- Auth: backend/routes/auth.js (324 lines)
+- Upload: backend/routes/upload.js (404 lines)
+- Website: backend/routes/website.js (466 lines)
+- Builder: backend/routes/builder.js (192 lines)
+- Builder V2: backend/routes/builder-v2.js (428 lines)
+- Template: backend/routes/template.js (501 lines)
+- User: backend/routes/user.js (416 lines)
+
+Frontend:
+- App: frontend/builder/src/App.jsx (122 lines)
+- GrapesJS Editor: frontend/builder/src/GrapesJSEditor.jsx (400+ lines)
+- Components: frontend/builder/src/components/ (5 files)
+
+Database:
+- Core schema: database/schema.sql (145 lines)
+- Builder schema: database/builder-schema.sql (300 lines)
+
+================================================================================
+RECOMMENDATIONS BY ROLE:
+================================================================================
+
+For Developers:
+1. Fix critical security issues first
+2. Add test coverage before new features
+3. Use consistent error handling pattern
+4. Implement API documentation
+
+For DevOps/DevSecOps:
+1. Set up CI/CD pipeline
+2. Add security scanning
+3. Implement log aggregation
+4. Set up monitoring and alerting
+
+For Product Managers:
+1. This is MVP quality, not production-ready
+2. Estimated 1 month to production-hardening
+3. Missing: email, analytics, custom domains
+4. Suitable for: beta testing, investors, learning
+
+For Security Review:
+1. Critical: Add auth to v2 routes
+2. High: CSRF protection, file validation
+3. Medium: Input sanitization, session mgmt
+4. Create security policy document
+
+================================================================================
+NEXT STEPS (Priority Order):
+================================================================================
+
+WEEK 1:
+1. Add auth middleware to builder-v2 routes (1 day)
+2. Fix hardcoded localhost (1 day)
+3. Implement CSRF protection (1 day)
+4. Add file content validation (2 days)
+
+WEEK 2-3:
+5. Set up Jest and write 20 unit tests (5 days)
+6. Configure email sending (2 days)
+7. Implement file cloud storage (3 days)
+8. Add error tracking (Sentry) (1 day)
+
+WEEK 4:
+9. Create API documentation (2 days)
+10. Load testing (2 days)
+11. Security audit/penetration testing (2 days)
+
+================================================================================
+RESOURCES:
+================================================================================
+
+Full Analysis: /Users/nitinlalla/Desktop/bettercv-system/CODEBASE_ANALYSIS.md
+
+Tech Stack References:
+- Express.js: https://expressjs.com/
+- PostgreSQL: https://www.postgresql.org/
+- GrapesJS: https://grapesjs.com/
+- Claude API: https://claude.ai/api
+
+Documentation Files in Repo:
+- README.md - Project overview
+- API_DOCUMENTATION.md - API reference
+- BUILDER_GUIDE.md - Builder implementation
+- CLEANUP_SUMMARY.md - Recent cleanup details
+
+================================================================================
+Generated: November 1, 2025
+Analysis Tool: Claude Code
+Repository: /Users/nitinlalla/Desktop/bettercv-system
+================================================================================

@@ -36,7 +36,8 @@ function App() {
         css: editor.getCss(),
       }));
 
-      const result = await fetch('http://localhost:3000/api/builder-v2/generate-website', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const result = await fetch(`${apiUrl}/api/builder-v2/generate-website`, {
         method: 'POST',
         body: formData,
       });
@@ -96,18 +97,20 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>BetterCV Builder</h1>
+        <div>
+          <h1>BetterCV — Website Builder</h1>
+          <p className="header-subtitle">Visual editor for portfolio websites</p>
+        </div>
         <div className="header-actions">
           <button onClick={handleExportHTML} className="btn btn-secondary">
             Export HTML
           </button>
-
           <button
             onClick={handleGenerateWebsite}
             className="btn btn-primary"
             disabled={isGenerating}
           >
-            {isGenerating ? 'Generating...' : 'AI Generate Website'}
+            {isGenerating ? 'Generating...' : 'AI Generate'}
           </button>
         </div>
       </header>

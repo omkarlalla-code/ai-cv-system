@@ -1,63 +1,138 @@
+/* Minimalist Design inspired by omkarlalla-code.github.io */
+* {
+  box-sizing: border-box;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d0d0d0;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #000000;
+}
+
 .app {
   width: 100%;
   height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
 }
 
 .app-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 30px;
+  padding: 24px 40px;
   background-color: #ffffff;
-  color: #1a1a1a;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #000000;
 }
 
 .app-header h1 {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 400;
+  color: #000000;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.header-subtitle {
+  font-size: 13px;
+  color: #666666;
+  margin: 4px 0 0 0;
+  font-weight: 300;
 }
 
 .header-actions {
   display: flex;
-  gap: 10px;
+  gap: 16px;
+  align-items: center;
 }
 
 .btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  font-size: 14px;
-  font-weight: 500;
+  padding: 10px 24px;
+  border: 1px solid #000000;
+  background-color: transparent;
+  font-size: 13px;
+  font-weight: 400;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #000000;
+  letter-spacing: 0.02em;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.05);
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn:hover::before {
+  left: 0;
+}
+
+.btn:active {
+  transform: translateY(1px);
 }
 
 .btn:disabled {
-  opacity: 0.6;
+  opacity: 0.3;
   cursor: not-allowed;
+  border-color: #cccccc;
+  color: #cccccc;
+}
+
+.btn:disabled::before {
+  display: none;
 }
 
 .btn-primary {
-  background-color: #667eea;
-  color: white;
+  background-color: #000000;
+  color: #ffffff;
+  border-color: #000000;
+}
+
+.btn-primary::before {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #5568d3;
+  background-color: #1a1a1a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .btn-secondary {
   background-color: transparent;
-  color: #1a1a1a;
-  border: 1px solid #e5e7eb;
+  color: #000000;
+  border: 1px solid #000000;
 }
 
-.btn-secondary:hover {
-  background-color: #f8f9fa;
+.btn-secondary::before {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #000000;
+  color: #ffffff;
 }
 
 .builder-container {
@@ -65,86 +140,130 @@
   overflow: hidden;
 }
 
-/* Template Modal */
+/* Template Modal - Minimalist with Animation */
 .template-modal {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(255, 255, 255, 0);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
   padding: 20px;
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    background-color: rgba(255, 255, 255, 0.95);
+  }
 }
 
 .template-modal-content {
   background-color: white;
-  border-radius: 12px;
+  border: 1px solid #000000;
   max-width: 1000px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transform: translateY(20px);
+  opacity: 0;
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
+}
+
+@keyframes slideUp {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .template-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 30px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 24px 40px;
+  border-bottom: 1px solid #000000;
 }
 
 .template-modal-header h2 {
   margin: 0;
-  font-size: 24px;
-  color: #1a1a1a;
+  font-size: 18px;
+  font-weight: 400;
+  color: #000000;
+  letter-spacing: -0.02em;
 }
 
 .close-btn {
   background: none;
-  border: none;
-  font-size: 32px;
+  border: 1px solid transparent;
+  font-size: 24px;
   cursor: pointer;
-  color: #666;
+  color: #000000;
   line-height: 1;
   padding: 0;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  transition: background-color 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
 .close-btn:hover {
-  background-color: #f3f4f6;
+  border-color: #000000;
+  transform: rotate(90deg);
+}
+
+.close-btn:active {
+  transform: rotate(90deg) scale(0.9);
 }
 
 .template-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-  padding: 30px;
+  gap: 32px;
+  padding: 40px;
 }
 
 .template-card {
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
+  border: 1px solid #d0d0d0;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   background-color: white;
+  position: relative;
+}
+
+.template-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  background: #000000;
+  transition: height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+}
+
+.template-card:hover::before {
+  height: 3px;
 }
 
 .template-card:hover {
-  border-color: #667eea;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
-  transform: translateY(-4px);
+  border-color: #000000;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.08);
+  transform: translate(-1px, -1px);
+}
+
+.template-card:active {
+  transform: translate(0, 0);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.05);
 }
 
 .template-preview {
@@ -218,47 +337,78 @@
 
 .template-card h3 {
   margin: 0;
-  padding: 16px 16px 8px 16px;
-  font-size: 18px;
-  color: #1a1a1a;
-  font-weight: 600;
+  padding: 20px 20px 8px 20px;
+  font-size: 15px;
+  color: #000000;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  position: relative;
+  z-index: 1;
 }
 
 .template-card p {
   margin: 0;
-  padding: 0 16px 16px 16px;
-  font-size: 14px;
-  color: #6b7280;
-  line-height: 1.5;
+  padding: 0 20px 20px 20px;
+  font-size: 13px;
+  color: #666666;
+  line-height: 1.6;
+  font-weight: 300;
+  position: relative;
+  z-index: 1;
+}
+
+.template-preview {
+  position: relative;
+  z-index: 1;
 }
 
 /* Preview Mode Controls */
 .preview-controls {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   margin-left: 20px;
-  padding: 4px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
 }
 
 .preview-btn {
   background: none;
-  border: none;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 4px;
+  border: 1px solid #000000;
+  color: #000000;
+  padding: 6px 16px;
   cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
+  font-size: 12px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 400;
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #000000;
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .preview-btn:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.preview-btn:hover::after {
+  width: 100%;
 }
 
 .preview-btn.active {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.preview-btn.active::after {
+  width: 100%;
 }
 
 .code-preview {
@@ -266,29 +416,32 @@
   bottom: 20px;
   right: 20px;
   background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 24px;
+  border: 1px solid #000000;
   max-width: 400px;
   z-index: 1000;
 }
 
 .code-preview h3 {
   margin-top: 0;
-  color: #667eea;
+  font-size: 15px;
+  color: #000000;
+  font-weight: 400;
 }
 
 .code-preview pre {
-  background-color: #f5f5f5;
-  padding: 10px;
-  border-radius: 5px;
+  background-color: #f8f8f8;
+  padding: 16px;
   overflow-x: auto;
   font-size: 12px;
-  margin: 10px 0;
+  margin: 12px 0;
+  font-family: 'Courier New', monospace;
+  border: 1px solid #e0e0e0;
 }
 
 .code-preview p {
-  color: #666;
-  font-size: 14px;
+  color: #666666;
+  font-size: 13px;
   margin-bottom: 0;
+  font-weight: 300;
 }
