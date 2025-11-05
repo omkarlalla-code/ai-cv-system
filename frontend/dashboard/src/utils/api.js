@@ -286,6 +286,40 @@ export const builderAPI = {
   },
 };
 
+/**
+ * Notifications API
+ */
+export const notificationsAPI = {
+  getAll: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `/api/notifications?${queryString}` : '/api/notifications';
+    return apiRequest(endpoint);
+  },
+
+  getUnreadCount: () =>
+    apiRequest('/api/notifications/unread-count'),
+
+  markAsRead: (notificationId) =>
+    apiRequest(`/api/notifications/${notificationId}/read`, {
+      method: 'POST',
+    }),
+
+  markAllAsRead: () =>
+    apiRequest('/api/notifications/mark-all-read', {
+      method: 'POST',
+    }),
+
+  delete: (notificationId) =>
+    apiRequest(`/api/notifications/${notificationId}`, {
+      method: 'DELETE',
+    }),
+
+  deleteAllRead: () =>
+    apiRequest('/api/notifications', {
+      method: 'DELETE',
+    }),
+};
+
 export default {
   auth: authAPI,
   cv: cvAPI,
@@ -295,4 +329,5 @@ export default {
   ai: aiAPI,
   stats: statsAPI,
   builder: builderAPI,
+  notifications: notificationsAPI,
 };
