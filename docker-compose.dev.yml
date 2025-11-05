@@ -1,0 +1,172 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14-alpine
+    container_name: bettercv-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-bettercv}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/builder-schema.sql:/docker-entrypoint-initdb.d/02-builder-schema.sql
+      - ./database/seed-templates.sql:/docker-entrypoint-initdb.d/03-seed-templates.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: bettercv-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: ${PORT:-3000}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-bettercv}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-bettercv}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      JWT_SECRET: ${JWT_SECRET:-dev_secret_change_in_production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      FRONTEND_URL: http://localhost:3002
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE:-10485760}
+      UPLOAD_DIR: ./uploads
+      # SMTP (optional for development)
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-noreply@bettercv.com}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - backend_uploads:/app/uploads
+    command: npm run dev
+
+  # Dashboard Frontend
+  dashboard:
+    build:
+      context: ./frontend/dashboard
+      dockerfile: Dockerfile.dev
+    container_name: bettercv-dashboard
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:3000
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./frontend/dashboard:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+
+  # Builder Frontend
+  builder:
+    build:
+      context: ./frontend/builder
+      dockerfile: Dockerfile.dev
+    container_name: bettercv-builder
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:3000
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./frontend/builder:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0 --port 3001
+
+  # Nginx Reverse Proxy (optional, for local testing of production-like setup)
+  nginx:
+    image: nginx:alpine
+    container_name: bettercv-nginx
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - dashboard
+      - builder
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    profiles:
+      - with-nginx
+
+  # Redis (optional, for caching)
+  redis:
+    image: redis:7-alpine
+    container_name: bettercv-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles:
+      - with-redis
+
+  # Mailhog (for email testing in development)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: bettercv-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    profiles:
+      - with-mailhog
+
+  # pgAdmin (optional, for database management)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: bettercv-pgadmin
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@bettercv.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_LISTEN_PORT: 5050
+    ports:
+      - "5050:5050"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    profiles:
+      - with-pgadmin
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  backend_uploads:
+    driver: local
+
+networks:
+  default:
+    name: bettercv-network
