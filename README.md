@@ -130,12 +130,22 @@ bettercv-system/
 ├── templates/                 # Website templates
 │   └── template1.html
 │
-├── docs/                      # Additional documentation
-│   ├── API_DOCUMENTATION.md
-│   ├── API_TESTING_GUIDE.md
-│   ├── BUILDER_GUIDE.md
-│   ├── BUILDER_SUMMARY.md
-│   └── QUICK_START.md
+├── docs/                      # Documentation
+│   ├── API_DOCUMENTATION.md   # Complete REST API reference
+│   ├── API_TESTING_GUIDE.md   # Testing workflows
+│   ├── BUILDER_GUIDE.md       # Builder tutorial
+│   ├── BUILDER_SUMMARY.md     # Technical overview
+│   ├── DEPLOYMENT_GUIDE.md    # Production deployment
+│   ├── DEVELOPMENT.md         # Development guide
+│   ├── QUICK_START.md         # Quick start guide
+│   └── ... (more docs)
+│
+├── scripts/                   # Utility scripts
+│   ├── setup-database.sh      # Database setup
+│   ├── setup-neon-db.sh       # Neon DB setup
+│   ├── setup-test-db.sh       # Test DB setup
+│   ├── test-fixes.sh          # Run tests
+│   └── deploy.sh              # Deployment script
 │
 ├── .env.example              # Environment variables template
 ├── .gitignore
@@ -146,87 +156,116 @@ bettercv-system/
 
 ### Prerequisites
 
-- Node.js 16+ and npm
-- PostgreSQL 13+
-- Anthropic API key ([Get one here](https://console.anthropic.com/))
+- **Node.js 16+** and npm
+- **PostgreSQL 13+**
+- **Anthropic API key** (optional for testing - [Get one here](https://console.anthropic.com/))
+  - ✅ App works in **demo mode** without API key
+  - ⚡ Add API key for real AI parsing
 
 ### Installation
 
-1. **Clone the repository**
+1. **Clone and install**
    ```bash
    git clone https://github.com/omkarlalla-code/ai-cv-system.git
    cd ai-cv-system
+
+   # Install backend dependencies
+   cd backend && npm install
+
+   # Install frontend builder dependencies
+   cd ../frontend/builder && npm install
+   cd ../..
    ```
 
-2. **Install dependencies**
-   ```bash
-   # Backend
-   cd backend
-   npm install
+2. **Set up database** (choose one method)
 
-   # Frontend builder
-   cd ../frontend/builder
-   npm install
+   **Option A: Quick Setup Script**
+   ```bash
+   chmod +x scripts/setup-database.sh
+   ./scripts/setup-database.sh
    ```
 
-3. **Set up the database**
+   **Option B: Manual Setup**
    ```bash
-   # Create database
    createdb bettercv
-
-   # Run migrations
    psql -U your_user -d bettercv -f database/schema.sql
-   psql -U your_user -d bettercv -f database/builder-schema.sql
+   psql -U your_user -d bettercv -f database/migrations/001_create_notifications.sql
+   psql -U your_user -d bettercv -f database/migrations/002_create_email_logs.sql
    ```
 
-4. **Configure environment**
+3. **Configure environment**
    ```bash
    # Copy example env file
    cp .env.example backend/.env
 
-   # Edit backend/.env and add:
-   # - ANTHROPIC_API_KEY (required)
-   # - DATABASE_URL
-   # - JWT_SECRET
-   # - Other configuration
+   # Edit backend/.env - Minimal required config:
+   # DATABASE_URL=postgresql://user:password@localhost:5432/bettercv
+   # JWT_SECRET=your-secret-key-here
+   # PORT=3000
+
+   # Optional (adds real AI parsing):
+   # ANTHROPIC_API_KEY=sk-ant-api01-xxxxx
    ```
 
-5. **Start the servers**
+4. **Start the application**
 
    ```bash
-   # Terminal 1: Backend (http://localhost:3000)
+   # Terminal 1: Backend API (http://localhost:3000)
    cd backend
    npm run dev
 
-   # Terminal 2: Builder (http://localhost:3001)
+   # Terminal 2: Builder App (http://localhost:3001)
    cd frontend/builder
    npm run dev
    ```
 
-6. **Open the application**
-   - Frontend: http://localhost:8080 (or open `frontend/index.html`)
-   - Builder: http://localhost:3001
-   - API: http://localhost:3000
+5. **Access the application**
+   - **Landing Page**: Open `frontend/index.html` in browser
+   - **Dashboard**: `frontend/dashboard/index.html`
+   - **Builder**: http://localhost:3001
+   - **API**: http://localhost:3000
 
 ### First Steps
 
-1. Register a new account at `/index.html`
-2. Log in to access the dashboard
-3. Upload a CV or start with the builder
-4. Choose a template or start from scratch
-5. Drag components, customize, and generate!
+1. **Register** a new account from the landing page
+2. **Log in** to access your dashboard
+3. **Upload your CV** (PDF, DOCX, or TXT)
+   - 🎭 Without API key: Gets realistic demo data
+   - ⚡ With API key: AI extracts your real data
+4. **Select a template** from 6 professional designs
+5. **Generate website** with one click
+6. **Customize** in the GrapesJS builder
+7. **Save and publish** your portfolio!
+
+### Demo Mode (No API Key Required)
+
+The application automatically runs in **demo mode** when no `ANTHROPIC_API_KEY` is configured:
+
+- ✅ Upload and parse CVs (extracts name, email, phone)
+- ✅ Uses realistic mock data for testing
+- ✅ Complete user flow works end-to-end
+- ✅ Perfect for development and testing
+
+Add your Anthropic API key later to enable real AI parsing.
 
 ## 📚 Documentation
 
 ### For Users
-- **[Quick Start Guide](QUICK_START.md)** - Get up and running in 3 steps
-- **[Builder Guide](BUILDER_GUIDE.md)** - Complete builder tutorial
-- **[PowerPoint Features](POWERPOINT_FEATURES.md)** - PowerPoint-like functionality
+- **[Quick Start Guide](docs/QUICK_START.md)** - Get up and running in 3 steps
+- **[Builder Guide](docs/BUILDER_GUIDE.md)** - Complete builder tutorial
+- **[View Application Guide](docs/VIEW_APPLICATION.md)** - How to access and use the app
 
 ### For Developers
-- **[API Documentation](API_DOCUMENTATION.md)** - Complete REST API reference
-- **[API Testing Guide](API_TESTING_GUIDE.md)** - Testing workflow and examples
-- **[Builder Summary](BUILDER_SUMMARY.md)** - Technical overview
+- **[API Documentation](docs/API_DOCUMENTATION.md)** - Complete REST API reference
+- **[API Testing Guide](docs/API_TESTING_GUIDE.md)** - Testing workflow and examples
+- **[Development Guide](docs/DEVELOPMENT.md)** - Development setup and workflow
+- **[Deployment Guide](docs/DEPLOYMENT_GUIDE.md)** - Production deployment instructions
+- **[Builder Summary](docs/BUILDER_SUMMARY.md)** - Technical overview
+
+### Additional Resources
+- **[Security Fixes](docs/SECURITY_FIXES.md)** - Security implementations
+- **[Feature Testing Guide](docs/FEATURE_TESTING_GUIDE.md)** - Testing features
+- **[Week by Week Roadmap](docs/WEEK_BY_WEEK_ROADMAP.md)** - Development roadmap
 
 ### API Collection
 - **[Thunder Client Collection](thunder-collection.json)** - Import into VS Code/Postman
