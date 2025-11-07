@@ -6,6 +6,7 @@ const UploadCV = () => {
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [parsing, setParsing] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [parsedData, setParsedData] = useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [error, setError] = useState(null);
@@ -132,6 +133,9 @@ const UploadCV = () => {
       return;
     }
 
+    setError(null);
+    setGenerating(true);
+
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch('/api/generate-website', {
@@ -152,11 +156,13 @@ const UploadCV = () => {
 
       const data = await response.json();
 
-      // Redirect to builder with the new website
+      // Redirect to builder with the new website after generation
+      // The builder will load the generated website content
       window.location.href = `/builder/index.html?project=${data.websiteId}`;
 
     } catch (err) {
       setError(err.message || 'Failed to generate website');
+      setGenerating(false);
     }
   };
 
@@ -403,12 +409,15 @@ const UploadCV = () => {
               <button
                 onClick={handleGenerateWebsite}
                 className="btn btn-primary btn-large"
-                disabled={!selectedTemplate}
+                disabled={!selectedTemplate || generating}
               >
-                Generate Website →
+                {generating ? '⏳ Generating Website...' : 'Generate Website & Open Builder →'}
               </button>
               <p className="generate-note">
-                Your website will be generated and opened in the builder for customization
+                {generating
+                  ? 'Please wait while we generate your website with AI...'
+                  : 'After generation, the GrapeJS builder will open automatically for customization'
+                }
               </p>
             </div>
           </div>

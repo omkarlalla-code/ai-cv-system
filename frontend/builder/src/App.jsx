@@ -20,8 +20,13 @@ function App() {
       setProjectId(pid);
       loadProject(pid);
     } else {
-      // No project ID, start with empty canvas
+      // No project ID - redirect to dashboard
+      // Builder can only be accessed after template selection and website generation
       setLoading(false);
+      setTimeout(() => {
+        alert('⚠️ Builder Access Denied\n\nPlease follow the proper flow:\n1. Upload your CV\n2. Select a template\n3. Generate your website\n\nYou will then be automatically redirected to the builder.');
+        window.location.href = '/dashboard/index.html#/upload';
+      }, 100);
     }
   }, []);
 
