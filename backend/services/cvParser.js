@@ -6,8 +6,16 @@ const axios = require('axios');
 
 class CVParser {
   constructor() {
-    this.claudeApiKey = process.env.CLAUDE_API_KEY;
+    // Check for API key (supports both ANTHROPIC_API_KEY and CLAUDE_API_KEY for backwards compatibility)
+    this.claudeApiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
     this.claudeApiUrl = 'https://api.anthropic.com/v1/messages';
+    this.demoMode = !this.claudeApiKey;
+
+    if (this.demoMode) {
+      console.warn('⚠️  DEMO MODE: No Anthropic API key found. Using mock CV parsing.');
+      console.warn('   Set ANTHROPIC_API_KEY in your .env file for real AI parsing.');
+      console.warn('   Get your key at: https://console.anthropic.com/');
+    }
   }
 
   /**
@@ -94,8 +102,15 @@ class CVParser {
 
   /**
    * Use Claude AI to extract structured data from raw text
+   * Falls back to demo data if no API key is configured
    */
   async extractStructuredData(rawText) {
+    // If in demo mode, return realistic mock data
+    if (this.demoMode) {
+      console.log('🎭 Using demo mode: Returning mock CV data');
+      return this.generateDemoData(rawText);
+    }
+
     try {
       const prompt = `
 You are an expert CV/Resume parser. Extract structured information from the following CV text and return it as a JSON object with the exact structure below. Be thorough and accurate.
@@ -248,6 +263,133 @@ Return only the JSON object, no additional text or explanations.`;
     }
 
     return true;
+  }
+
+  /**
+   * Generate demo/mock data for testing without API key
+   * Attempts to extract basic info from raw text, falls back to realistic defaults
+   */
+  generateDemoData(rawText) {
+    // Try to extract name from first line (common in CVs)
+    const lines = rawText.split('\n').filter(line => line.trim());
+    const potentialName = lines[0]?.trim() || 'John Doe';
+
+    // Try to find email with regex
+    const emailMatch = rawText.match(/[\w.-]+@[\w.-]+\.\w+/);
+    const email = emailMatch ? emailMatch[0] : 'demo@example.com';
+
+    // Try to find phone number
+    const phoneMatch = rawText.match(/[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}/);
+    const phone = phoneMatch ? phoneMatch[0] : '+1 (555) 123-4567';
+
+    console.log(`   Extracted: ${potentialName} <${email}>`);
+
+    return {
+      personal: {
+        name: potentialName,
+        email: email,
+        phone: phone,
+        location: 'San Francisco, CA',
+        linkedin: 'linkedin.com/in/demo-user',
+        github: 'github.com/demo-user',
+        website: 'demo-portfolio.com',
+        summary: 'Experienced professional with a strong background in software development and project management. Passionate about building innovative solutions and leading high-performing teams.'
+      },
+      education: [
+        {
+          institution: 'University of California, Berkeley',
+          degree: 'Bachelor of Science',
+          field: 'Computer Science',
+          startYear: '2016',
+          endYear: '2020',
+          grade: '3.8 GPA',
+          location: 'Berkeley, CA',
+          description: 'Focus on Software Engineering and Artificial Intelligence'
+        },
+        {
+          institution: 'Stanford University',
+          degree: 'Master of Science',
+          field: 'Computer Science',
+          startYear: '2020',
+          endYear: '2022',
+          grade: '3.9 GPA',
+          location: 'Stanford, CA',
+          description: 'Specialization in Machine Learning and Data Science'
+        }
+      ],
+      experience: [
+        {
+          company: 'Tech Innovations Inc.',
+          position: 'Senior Software Engineer',
+          startDate: 'Jan 2022',
+          endDate: 'Present',
+          location: 'San Francisco, CA',
+          description: 'Leading development of cloud-native applications using modern technologies. Architected and implemented microservices infrastructure serving 1M+ users. Mentored junior developers and conducted code reviews.',
+          technologies: ['React', 'Node.js', 'PostgreSQL', 'AWS', 'Docker', 'Kubernetes']
+        },
+        {
+          company: 'StartupXYZ',
+          position: 'Full Stack Developer',
+          startDate: 'Jun 2020',
+          endDate: 'Dec 2021',
+          location: 'San Francisco, CA',
+          description: 'Built and maintained full-stack web applications. Implemented RESTful APIs and responsive frontend interfaces. Collaborated with cross-functional teams in agile environment.',
+          technologies: ['JavaScript', 'Python', 'MongoDB', 'Express.js', 'React']
+        }
+      ],
+      projects: [
+        {
+          name: 'E-Commerce Platform',
+          description: 'Developed a scalable e-commerce platform with payment integration, inventory management, and real-time analytics. Handled 10k+ daily active users.',
+          technologies: ['React', 'Node.js', 'Stripe API', 'Redis', 'PostgreSQL'],
+          startDate: 'Mar 2021',
+          endDate: 'Dec 2021',
+          url: 'demo-ecommerce.com',
+          github: 'github.com/demo/ecommerce'
+        },
+        {
+          name: 'AI Chatbot Service',
+          description: 'Created an intelligent chatbot using natural language processing. Integrated with multiple messaging platforms and CRM systems.',
+          technologies: ['Python', 'TensorFlow', 'FastAPI', 'Docker'],
+          startDate: 'Jun 2022',
+          endDate: 'Nov 2022',
+          url: null,
+          github: 'github.com/demo/ai-chatbot'
+        }
+      ],
+      skills: {
+        programming: ['JavaScript', 'Python', 'TypeScript', 'Java', 'Go'],
+        frameworks: ['React', 'Node.js', 'Express', 'Django', 'FastAPI'],
+        tools: ['Git', 'Docker', 'Kubernetes', 'Jenkins', 'Terraform'],
+        databases: ['PostgreSQL', 'MongoDB', 'Redis', 'MySQL'],
+        other: ['AWS', 'Microservices', 'REST APIs', 'GraphQL', 'Agile/Scrum']
+      },
+      certifications: [
+        {
+          name: 'AWS Certified Solutions Architect',
+          issuer: 'Amazon Web Services',
+          date: 'Mar 2022',
+          url: 'aws.amazon.com/certification'
+        },
+        {
+          name: 'Certified Kubernetes Administrator',
+          issuer: 'Cloud Native Computing Foundation',
+          date: 'Jul 2023',
+          url: null
+        }
+      ],
+      languages: [
+        {
+          name: 'English',
+          proficiency: 'Native'
+        },
+        {
+          name: 'Spanish',
+          proficiency: 'Intermediate'
+        }
+      ],
+      interests: ['Open Source Contribution', 'Machine Learning', 'Cloud Architecture', 'Technical Writing', 'Mentoring']
+    };
   }
 
   /**
